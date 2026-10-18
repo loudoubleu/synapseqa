@@ -19,8 +19,10 @@ All resolved:
   `TEST_ADMIN_PASSWORD`, `TEST_BOOKER_API_URL`)
 - [x] Add `TEST_ORANGEHRM_URL` / `TEST_BOOKER_API_URL` to real `.env` (confirmed with user)
 - [x] `src/framework/` package skeleton + `config/settings.py` (pydantic-settings, `TEST_` prefix, local/demo)
-- [ ] `tests/conftest.py`: session `settings` fixture, `base_url` override, readiness autouse check,
-  default timeout wiring, `destructive`-skip-on-demo hook
+- [x] `tests/conftest.py`: session `settings` fixture, `base_url` override, readiness autouse check,
+  default timeout wiring, `destructive`-skip-on-demo hook — all four behaviors verified with a
+  throwaway test (not committed): base_url resolves, login page loads, context timeout is 10s not
+  Playwright's 30s default, and the destructive test is skipped only under `TEST_ENV=demo`
 - [ ] UI slice: `ui/pages/base_page.py`, `login_page.py`, `dashboard_page.py`
 - [ ] `tests/ui/test_login.py`: valid login → dashboard (smoke); invalid password message;
   empty-field validation (confirm exact UI text first)

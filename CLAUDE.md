@@ -66,8 +66,12 @@ Directories from the plan that **do not exist yet**: `tests/`,
 `.github/workflows/`, `Dockerfile` (test runner), `.pre-commit-config.yaml`, `README.md`.
 `docs/` now exists, holding a copy of the plan Word doc (no `architecture.md`/`adr/` yet). `.env.example`
 exists and is committed. `src/framework/config/settings.py` exists (pydantic-settings `Settings` class,
-verified loads from `.env` and passes ruff/mypy). `TODO.md` at the repo root tracks the full checklist
-derived from the plan — update it alongside §9 as steps land.
+verified loads from `.env` and passes ruff/mypy). `tests/conftest.py` exists: session `settings`
+fixture, `base_url` override, autouse OrangeHRM readiness check (reuses `infra/wait_for_ready.py` via
+a `sys.path` insert — that script stays stdlib-only), `context` fixture override applying
+`default_timeout_ms`, and a `pytest_collection_modifyitems` hook skipping `destructive` tests when
+`TEST_ENV=demo`. `TODO.md` at the repo root tracks the full checklist derived from the plan — update
+it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 
