@@ -40,7 +40,8 @@ CI/CD, roadmap, showcase tips, open decisions). Consider copying it into `docs/`
 ## 2. Current state of the codebase
 
 **Phase 1 (Foundation) is partly done.** Infrastructure and tooling exist and are verified;
-no framework code or real tests have been written yet. **Not a git repository yet.**
+no framework code or real tests have been written yet. **Git repository initialized**
+(first commit `b4b3793 chore: bootstrap project`).
 
 ```
 SynapseQA/
@@ -71,6 +72,10 @@ the repo root tracks the full checklist derived from the plan — update it alon
 - `TEST_ADMIN_USERNAME`, `TEST_ADMIN_PASSWORD` — the OrangeHRM admin created in the install wizard.
   Verified 2026-10-18: they log in successfully on port 8081 **and** match the admin in `seed/orangehrm.sql`.
 - `TEST_ENV=local`
+- `TEST_ORANGEHRM_URL=http://localhost:8081`, `TEST_BOOKER_API_URL=https://restful-booker.herokuapp.com`
+  — added 2026-10-18 so `Settings` (§9 step 3) has everything it needs.
+
+`.env.example` (committed, placeholders only) mirrors these five keys.
 
 ---
 

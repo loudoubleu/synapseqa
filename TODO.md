@@ -14,10 +14,10 @@ All resolved:
 
 ## Phase 1 — Foundation (in progress)
 
-- [ ] `git init`; confirm `.env`/`.venv` ignored; first commit (conventional commit style)
-- [ ] `.env.example` with placeholders (`TEST_ENV`, `TEST_ORANGEHRM_URL`, `TEST_ADMIN_USERNAME`,
+- [x] `git init`; confirm `.env`/`.venv` ignored; first commit (conventional commit style) — `b4b3793`
+- [x] `.env.example` with placeholders (`TEST_ENV`, `TEST_ORANGEHRM_URL`, `TEST_ADMIN_USERNAME`,
   `TEST_ADMIN_PASSWORD`, `TEST_BOOKER_API_URL`)
-- [ ] Add `TEST_ORANGEHRM_URL` / `TEST_BOOKER_API_URL` to real `.env` (ask user first — it's their file)
+- [x] Add `TEST_ORANGEHRM_URL` / `TEST_BOOKER_API_URL` to real `.env` (confirmed with user)
 - [ ] `src/framework/` package skeleton + `config/settings.py` (pydantic-settings, `TEST_` prefix, local/demo)
 - [ ] `tests/conftest.py`: session `settings` fixture, `base_url` override, readiness autouse check,
   default timeout wiring, `destructive`-skip-on-demo hook
