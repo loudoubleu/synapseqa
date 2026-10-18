@@ -62,10 +62,12 @@ SynapseQA/
             └── cryptokeys/.htaccess  # from the image; no encryption key (encryption disabled)
 ```
 
-Directories from the plan that **do not exist yet**: `src/framework/`, `tests/`,
-`.github/workflows/`, `Dockerfile` (test runner), `.env.example`, `.pre-commit-config.yaml`, `README.md`.
-`docs/` now exists, holding a copy of the plan Word doc (no `architecture.md`/`adr/` yet). `TODO.md` at
-the repo root tracks the full checklist derived from the plan — update it alongside §9 as steps land.
+Directories from the plan that **do not exist yet**: `tests/`,
+`.github/workflows/`, `Dockerfile` (test runner), `.pre-commit-config.yaml`, `README.md`.
+`docs/` now exists, holding a copy of the plan Word doc (no `architecture.md`/`adr/` yet). `.env.example`
+exists and is committed. `src/framework/config/settings.py` exists (pydantic-settings `Settings` class,
+verified loads from `.env` and passes ruff/mypy). `TODO.md` at the repo root tracks the full checklist
+derived from the plan — update it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 
