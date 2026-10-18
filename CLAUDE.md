@@ -41,7 +41,9 @@ CI/CD, roadmap, showcase tips, open decisions). Consider copying it into `docs/`
 
 **Phase 1 (Foundation) is partly done.** Infrastructure and tooling exist and are verified;
 no framework code or real tests have been written yet. **Git repository initialized**
-(first commit `b4b3793 chore: bootstrap project`).
+(first commit `929aaac chore: bootstrap project`; pushed to
+`https://github.com/loudoubleu/synapseqa`). History was rewritten once (`929aaac`..`3a1f5f1`) to drop
+an unwanted `Co-Authored-By: Claude` trailer — do not add that trailer to future commits.
 
 ```
 SynapseQA/

@@ -14,7 +14,9 @@ All resolved:
 
 ## Phase 1 — Foundation (in progress)
 
-- [x] `git init`; confirm `.env`/`.venv` ignored; first commit (conventional commit style) — `b4b3793`
+- [x] `git init`; confirm `.env`/`.venv` ignored; first commit (conventional commit style) — `929aaac`
+- [x] Push to `https://github.com/loudoubleu/synapseqa` (public); history rewritten to drop the
+  `Co-Authored-By: Claude` trailer per user request — don't add it to future commits
 - [x] `.env.example` with placeholders (`TEST_ENV`, `TEST_ORANGEHRM_URL`, `TEST_ADMIN_USERNAME`,
   `TEST_ADMIN_PASSWORD`, `TEST_BOOKER_API_URL`)
 - [x] Add `TEST_ORANGEHRM_URL` / `TEST_BOOKER_API_URL` to real `.env` (confirmed with user)
