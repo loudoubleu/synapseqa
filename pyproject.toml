@@ -1,0 +1,75 @@
+[project]
+name = "synapseqa"
+version = "0.1.0"
+description = "UI + API test automation framework (Playwright, Pytest, Python) for OrangeHRM and Restful Booker"
+requires-python = ">=3.12"
+dependencies = [
+    "allure-pytest>=2.16.2",
+    "faker>=40.43.0",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.0",
+    "pytest>=9.1.1",
+    "pytest-playwright>=0.10.0",
+    "pytest-rerunfailures>=16.7",
+    "pytest-xdist>=3.8.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pre-commit>=4.7.0",
+    "ruff>=0.17.1",
+]
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+pythonpath = ["src"]                 # makes `import framework` work from src/framework
+addopts = [
+    "-ra",                           # summary of skips/xfails/failures
+    "--strict-markers",              # typo in a marker name = error, not a silent new marker
+    "--strict-config",
+    # Playwright defaults (override on the command line, e.g. --browser firefox --headed)
+    "--browser=chromium",
+    "--tracing=retain-on-failure",
+    "--video=retain-on-failure",
+    "--screenshot=only-on-failure",
+    "--output=test-results",         # traces, videos and screenshots of failed tests
+    # Allure raw results; view with `allure serve reports/allure-results`
+    "--alluredir=reports/allure-results",
+    "--clean-alluredir",
+]
+markers = [
+    "smoke: fast, critical-path checks run on every pull request",
+    "regression: full suite, run nightly",
+    "ui: browser tests through page objects",
+    "api: HTTP tests through API clients",
+    "e2e: hybrid tests (API sets up state, UI verifies it)",
+    "roles: role-based access tests (Admin vs. ESS)",
+    "destructive: changes shared data; skipped automatically when TEST_ENV=demo",
+]
+# `flaky` is provided by pytest-rerunfailures: @pytest.mark.flaky(reruns=2)
+xfail_strict = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s %(levelname)-8s %(name)s: %(message)s"
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "PT", "RUF"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false        # fixtures-as-arguments make full typing noisy in tests

@@ -1,0 +1,49 @@
+# Local OrangeHRM for SynapseQA tests.
+#
+# Starts already installed: the database is loaded from seed/orangehrm.sql the
+# first time the db volume is created, and the app reuses the Conf.php written
+# by the original install. No setup wizard needed.
+#
+#   Start:  docker compose -f infra/docker-compose.orangehrm.yml up -d --wait
+#   Reset:  docker compose -f infra/docker-compose.orangehrm.yml down -v   (then Start)
+#
+# The DB password below must match the one in seed/confs/Conf.php. Both are
+# local test values only.
+
+services:
+  db:
+    image: mariadb:11.8.9@sha256:f16d7a344413e519dff518f27bdb221388f84b0d274c97c4fb5f2cb0dc1b34fa
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: orangehrm
+    volumes:
+      - db_data:/var/lib/mysql
+      # Runs only when db_data is empty (first start or after `down -v`)
+      - ./seed/orangehrm.sql:/docker-entrypoint-initdb.d/01-orangehrm.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s   # seed import happens before the server reports healthy
+
+  orangehrm:
+    # OrangeHRM 5.9 (Docker Hub only publishes `latest`, so pin by digest)
+    image: orangehrm/orangehrm@sha256:d692780efbb118b1ede754cfb153057baecf4c4c5f84627621ed015cf837ac28
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${ORANGEHRM_PORT:-8081}:80"
+    volumes:
+      # Marks the app as installed and points it at the `db` service
+      - ./seed/confs/Conf.php:/var/www/html/lib/confs/Conf.php:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/web/index.php/auth/login"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+volumes:
+  db_data:
