@@ -33,7 +33,8 @@ All resolved:
 - [x] API slice: `api/base_client.py`, `api/models/employee.py`, `api/clients/employee_client.py`
   (built from admin `storage_state`)
 - [x] `tests/api/orangehrm/test_employees.py`: list employees → 200 + schema validation (smoke, api)
-- [ ] Restful Booker smoke: `booking_client.py` (token auth), `GET /booking`, bad-credentials `POST /auth`
+- [x] Restful Booker smoke: `booking_client.py` (token auth), `GET /booking`, bad-credentials `POST /auth`
+  — verified against the live API first (bad auth returns 200 + `{"reason": "Bad credentials"}`, not 401)
 - [ ] `.pre-commit-config.yaml` (ruff check+format, mypy); `uv run pre-commit install`
 - [ ] `.github/workflows/ci.yml`: checkout → setup-uv → `uv sync` → compose up --wait → readiness probe →
   playwright install --with-deps → ruff → mypy → `pytest -m smoke` → upload `test-results/` on failure

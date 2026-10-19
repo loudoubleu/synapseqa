@@ -8,6 +8,7 @@ from playwright.sync_api import Browser, BrowserContext, Page, Playwright, expec
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "infra"))
 from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[import-not-found]
 
+from framework.api.clients.booking_client import BookingClient
 from framework.api.clients.employee_client import EmployeeClient
 from framework.config.settings import Settings
 from framework.ui.pages.login_page import LoginPage
@@ -73,6 +74,14 @@ def employee_client(
 ) -> Iterator[EmployeeClient]:
     request_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
     yield EmployeeClient(request_context, base_url)
+    request_context.dispose()
+
+
+@pytest.fixture
+def booking_client(playwright: Playwright, settings: Settings) -> Iterator[BookingClient]:
+    booker_url = str(settings.booker_api_url)
+    request_context = playwright.request.new_context(base_url=booker_url)
+    yield BookingClient(request_context, booker_url)
     request_context.dispose()
 
 

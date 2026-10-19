@@ -83,8 +83,11 @@ lands pre-authenticated with no `LoginPage` interaction needed. API layer first 
 employee.py` (pydantic `Employee`/`EmployeeListResponse`), `api/clients/employee_client.py`
 (`EmployeeClient.list()`); `tests/conftest.py`'s `employee_client` fixture builds it from
 `playwright.request.new_context(storage_state=admin_storage_state)`. `tests/api/orangehrm/
-test_employees.py` passes against the real API. `TODO.md` at the repo root tracks the full checklist
-derived from the plan — update it alongside §9 as steps land.
+test_employees.py` passes against the real API. Restful Booker smoke also exists: `api/models/
+booking.py` (`BookingIdSummary`), `api/clients/booking_client.py` (`authenticate()` → token or `None`,
+`list_booking_ids()`), a `booking_client` fixture (no auth needed for these calls), and
+`tests/api/restful_booker/test_booking_smoke.py` — both passing against the live public API. `TODO.md`
+at the repo root tracks the full checklist derived from the plan — update it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 
@@ -273,6 +276,12 @@ Never change the admin's password or roles in tests; create dedicated test users
   `/var/www/html/lib/confs/Conf.php`, PHP 8.3, `curl` available in the container.
 - Still **unverified** (check against the running app before hard-coding): other API paths/payloads
   (create/delete employee, admin users), each role's menu items, the access-denied behaviour for ESS users.
+
+**Restful Booker facts verified:** `POST /auth` with valid credentials (`admin`/`password123`, the
+service's own public demo credentials) returns **200** `{"token": "..."}`; with bad credentials it
+still returns **200**, body `{"reason": "Bad credentials"}` — never 401/403, so `BookingClient.
+authenticate()` returns `None` rather than raising. `GET /booking` returns **200** with a JSON array of
+`{"bookingid": int}`.
 
 ---
 
