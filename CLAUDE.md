@@ -38,10 +38,10 @@ at `docs/Test_Automation_Framework_Plan.docx`.
 
 ## 2. Current state of the codebase
 
-**Phases 1–3 are complete** (Foundation, full API layer, UI layer except Leave pages — blocked, see
-below) — see `TODO.md`. Git repository initialized and pushed to
-`https://github.com/loudoubleu/synapseqa` (public); CI runs on every pull request; pre-commit hooks
-installed locally.
+**Phases 1–4 are complete**, except two items blocked by the same gap (Foundation, full API layer, UI
+layer, hybrid+roles — Leave pages and Supervisor role tests blocked, see below) — see `TODO.md`. Git
+repository initialized and pushed to `https://github.com/loudoubleu/synapseqa` (public); CI runs on
+every pull request; pre-commit hooks installed locally.
 
 ```
 SynapseQA/
@@ -61,31 +61,34 @@ SynapseQA/
 ├── src/framework/
 │   ├── config/settings.py             # pydantic-settings Settings, local/demo
 │   ├── data/builders.py               # EmployeeBuilder, UserBuilder, BookingBuilder (Faker)
+│   ├── auth/roles.py                  # Role enum, EXPECTED_MENU per role
 │   ├── ui/
 │   │   ├── pages/{base_page,login_page,dashboard_page}.py
 │   │   ├── pages/pim/{employee_list_page,add_employee_page,personal_details_page}.py
 │   │   ├── pages/admin/{user_management_page,add_user_page}.py
-│   │   └── components/{component,dropdown,autocomplete,date_picker,data_table,toast,modal}.py
+│   │   └── components/{component,dropdown,autocomplete,date_picker,data_table,toast,modal,side_menu}.py
 │   └── api/
 │       ├── base_client.py             # wraps APIRequestContext: get/post/put/patch/delete_json + logging
 │       ├── models/{common,employee,user,booking}.py
 │       └── clients/{employee_client,user_client,booking_client}.py
 └── tests/
-    ├── conftest.py                    # settings/base_url/readiness + auth-state + API client fixtures
-    │                                   # + an Allure failure-screenshot hook
-    ├── ui/{test_login,test_add_employee,test_personal_details,test_employee_delete_modal}.py
-    ├── e2e/{test_employee_search_hybrid,test_admin_add_user_hybrid}.py
+    ├── conftest.py                    # settings/base_url/readiness + admin+ESS auth-state + role fixtures
+    │                                   # + all API client fixtures + an Allure failure-screenshot hook
+    ├── ui/{test_login,test_add_employee,test_personal_details,test_employee_delete_modal,
+    │       test_network_mocking,test_visual_regression,test_accessibility}.py
+    ├── e2e/{test_employee_search_hybrid,test_admin_add_user_hybrid,test_user_search_hybrid}.py
+    ├── roles/test_role_access.py
     └── api/{orangehrm/{test_employees,test_users}.py, restful_booker/{test_booking_smoke,test_booking_crud}.py}
 ```
 
-Still missing from the target layout (Phase 4+, see `TODO.md`): `Dockerfile` (test runner),
-`docs/architecture.md`, `.github/workflows/{nightly,demo-smoke}.yml`, Leave pages (blocked — see below),
-per-role auth (`auth/roles.py`).
+Still missing from the target layout (Phase 5+, see `TODO.md`): `Dockerfile` (test runner),
+`docs/architecture.md`, `.github/workflows/{nightly,demo-smoke}.yml`.
 
-**Leave pages are deliberately not built yet.** A fresh seeded instance has no leave type or leave
-period configured — `/leave/applyLeave` shows "No Leave Types with Leave Balance" rather than a usable
-form. Building `ApplyLeavePage`/approval pages needs that configured first (via Admin > Leave in the UI,
-or finding the right API payload) — not yet investigated.
+**Leave pages and Supervisor role tests are deliberately not built yet — same blocker.** A fresh seeded
+instance has no leave type or leave period configured — `/leave/applyLeave` shows "No Leave Types with
+Leave Balance" rather than a usable form. Building `ApplyLeavePage`/approval pages (and, downstream,
+Supervisor role tests, which need an ESS user's leave request to approve) needs that configured first
+(via Admin > Leave in the UI, or finding the right API payload) — not yet investigated.
 
 GitHub repo secrets `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD` are set (via `gh secret set`, values
 never printed). History was rewritten once early on (commits `929aaac`..`3a1f5f1`) to drop an unwanted
@@ -315,8 +318,23 @@ Never change the admin's password or roles in tests; create dedicated test users
   DB-snapshot approach.
 - Image layout: web root `/var/www/html` (declared as a Docker VOLUME), config at
   `/var/www/html/lib/confs/Conf.php`, PHP 8.3, `curl` available in the container.
-- Still **unverified** (check against the running app before hard-coding, needed for Phase 4): ESS's
-  menu items, the access-denied behaviour for ESS users hitting admin pages/API endpoints.
+- **ESS role (confirmed):** side menu is `{Leave, Time, My Info, Performance, Dashboard, Directory,
+  Claim, Buzz}` — no Admin, PIM, Recruitment, or Maintenance (vs. Admin's full 12-item menu above).
+  Navigating directly to an admin UI URL (e.g. `/admin/viewSystemUsers`) does **not** redirect —
+  the page loads but shows the text "Credential Required" instead of the real content. Hitting an
+  admin API endpoint (e.g. `GET /admin/users`) as ESS returns **403**
+  `{"error":{"status":403,"message":"Unauthorized"}}`, same shape as the unauthenticated case.
+- **Accessibility:** the real app has genuine pre-existing non-critical `axe-core` violations on
+  every page checked (color-contrast, missing landmarks, missing `html[lang]`, missing H1, etc.) —
+  this is the app's own debt, not something to "fix" from the test suite. `tests/ui/test_accessibility.py`
+  scopes its assertion to `impact == "critical"` on the login page specifically, which currently has
+  none; that's a meaningful regression guard, not a blanket zero-violations claim.
+- **Visual regression:** `expect(page).to_have_screenshot()` **does not exist in Python's Playwright
+  bindings** — confirmed by inspecting `PageAssertions` on the installed version (1.64.0); it's a
+  Node.js/`@playwright/test`-only API that CLAUDE.md's plan assumed existed. Used
+  `pytest-playwright-visual-snapshot`'s `assert_snapshot(page, name=...)` fixture instead (same
+  baseline/compare/diff workflow). Baselines live in `__snapshots__/` and **are committed**; diff
+  output on a failing run goes to `snapshot_failures/` (gitignored).
 
 **Restful Booker facts verified:** `POST /auth` with valid credentials (`admin`/`password123`, the
 service's own public demo credentials) returns **200** `{"token": "..."}`; with bad credentials it
@@ -349,30 +367,27 @@ disappear on its own; tests always create and delete their own data rather than 
 
 ---
 
-## 9. Exact next steps (Phases 1–3 mostly complete → now in Phase 4)
+## 9. Exact next steps (Phases 1–4 complete, except the Leave blocker → now in Phase 5)
 
-Phase 1 (12 steps), Phase 2 (full `EmployeeClient`/`UserClient` CRUD with 422-contract tests, the full
-Restful Booker CRUD + negative/data-driven/timing suite, Faker-backed data builders), and Phase 3
-(component library, PIM/Admin pages, Allure failure screenshots) are all done — see `TODO.md` for the
-checked-off detail, and git history for how each fact was verified against the real app/API before
-being coded. Phase 3's one open item, Leave pages, is blocked (§7: no leave type/period configured on a
-fresh instance) and deferred.
+Phases 1–4 are done — see `TODO.md` for the checked-off detail on each, and git history for how every
+fact was verified against the real app/API before being coded. The two open items (Leave pages,
+Supervisor role tests) share one blocker: a fresh seeded instance has no leave type or leave period
+configured (§7). Picking that up means either configuring it via Admin > Leave in the UI once and
+re-snapshotting `infra/seed/orangehrm.sql`, or finding the right API payload — neither investigated yet.
 
-**Now in Phase 4 — hybrid + roles** (per the roadmap and `TODO.md`):
+**Now in Phase 5 — scale + polish** (per the roadmap and `TODO.md`):
 
-- 1–3 more hybrid (`e2e`-marked) flows beyond the two already built in Phase 3 (employee-created-via-API
-  shows in PIM search; admin creates a user via UI for an API-created employee).
-- `src/framework/auth/roles.py`: a `Role` enum and per-role login that saves `storage_state`, mirroring
-  the existing `admin_storage_state` fixture but parametrized — first confirm ESS's actual menu and the
-  access-denied behavior for ESS hitting admin pages/API endpoints (§7 flags both as unverified).
-- A `logged_in_as` parametrized fixture; role tests for menu visibility, direct-URL access, and API
-  401/403 checks (Admin vs. ESS). Decide then whether Supervisor role tests fit in this pass or need the
-  Leave module unblocked first (an ESS supervisor approving leave needs Leave pages to exist).
-- Network mocking (`page.route`) for at least one UI error-handling case (e.g. a simulated 500 from the
-  employee list API); a visual regression check; an accessibility scan.
+- `pytest-xdist` parallel runs (local env only — never against the public demo, §11).
+- Browser matrix (Chromium/Firefox/WebKit) for the nightly workflow.
+- A Dockerized test runner image (`mcr.microsoft.com/playwright/python` base per the plan).
+- Allure report published to GitHub Pages, with history across runs.
+- `.github/workflows/nightly.yml` (full regression, sharded, browser matrix) and `demo-smoke.yml`
+  (serial, Chromium only, against the public demo, no destructive tests — `TEST_ENV=demo` already makes
+  the suite behave correctly for this, confirmed in Phase 1/2/3/4 testing).
 
-After Phase 4: Phase 5 (xdist, browser matrix, Dockerized runner, Allure on GitHub Pages, nightly +
-demo-smoke workflows), Phase 6 (showcase polish).
+After Phase 5: Phase 6 (showcase polish — README architecture diagram refresh, "how to add a test"
+guide, demo GIF, status badges, clean commit history, a final pass for `time.sleep`/XPath/assertions-in-
+page-objects/hard-coded data).
 
 ---
 

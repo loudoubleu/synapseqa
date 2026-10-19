@@ -88,17 +88,26 @@ All resolved:
 
 ## Phase 4 — Hybrid + roles
 
-- [ ] 3–5 E2E hybrid flows (API sets up state, UI verifies) — 2 already done in Phase 3
-  (`tests/e2e/`: employee created via API shows in PIM search; admin creates a user via UI for an
-  API-created employee), 1–3 more to add; leave-applied-in-UI-shows-via-API needs Leave pages first
-- [ ] `auth/roles.py`: `Role` enum, per-role login + `storage_state`
-- [ ] `logged_in_as` parametrized fixture
-- [ ] Role tests: menu visibility (Admin vs. ESS), direct-URL access, API 401/403 checks
+- [x] 3–5 E2E hybrid flows (API sets up state, UI verifies) — 3 done (`tests/e2e/`): employee created
+  via API shows in PIM search; admin creates a user via UI for an API-created employee; user created
+  via API shows in Admin's user search. Leave-applied-in-UI-shows-via-API still needs Leave pages first
+- [x] `auth/roles.py`: `Role` enum, per-role login + `storage_state` (`ess_storage_state` fixture
+  creates a throwaway employee+ESS user via the API each session, logs in once, tears down after)
+- [x] `logged_in_as` parametrized fixture (indirect on `role`)
+- [x] Role tests: menu visibility (Admin vs. ESS — confirmed exact menu sets against the app), direct-URL
+  access ("Credential Required" for ESS on an admin page), API 401/403 checks (403 confirmed)
 - [ ] Supervisor role tests: ESS user assigned as another employee's supervisor; can see and approve
-  their direct report's leave requests
-- [ ] Network mocking tests (`page.route`) — e.g. simulate a 500 from the employee list API
-- [ ] Visual regression check (`expect(page).to_have_screenshot()`)
-- [ ] Accessibility scan (axe-playwright-python)
+  their direct report's leave requests — **blocked**, same reason as Leave pages (needs Leave module
+  configured first)
+- [x] Network mocking tests (`page.route`) — employee-list API mocked to 500; confirmed the UI degrades
+  gracefully (error toast + "No Records Found") rather than crashing
+- [x] Visual regression check — `expect(page).to_have_screenshot()` **does not exist in Python
+  Playwright** (confirmed: it's a Node.js/`@playwright/test`-only API); used
+  `pytest-playwright-visual-snapshot`'s `assert_snapshot` fixture instead (same workflow). Verified it
+  both passes against its baseline and genuinely catches a real pixel change
+- [x] Accessibility scan (`axe-playwright-python`) — scoped to "critical" impact on the login page
+  (the app has real pre-existing non-critical violations outside our control; see `CLAUDE.md` §7).
+  Verified it genuinely fails when a critical issue is introduced
 
 ## Phase 5 — Scale + polish
 
@@ -121,5 +130,7 @@ All resolved:
 ## Coverage target sanity check
 
 - [ ] ~40–60 total tests across: OrangeHRM API, Restful Booker API, UI, E2E/hybrid (3–5), roles,
-  network mocking — not hundreds of shallow ones
+  network mocking — not hundreds of shallow ones. **31 tests as of end of Phase 4** (5 OrangeHRM API,
+  10 Restful Booker API, 8 UI incl. visual/a11y/network-mocking, 3 E2E hybrid, 4 roles, 3 UI login) —
+  on track; Phase 5/6 shouldn't need many more to land in range
 
