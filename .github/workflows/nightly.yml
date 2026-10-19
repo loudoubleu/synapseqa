@@ -61,3 +61,63 @@ jobs:
       - name: Stop OrangeHRM
         if: always()
         run: docker compose -f infra/docker-compose.orangehrm.yml down -v
+
+  publish-report:
+    needs: regression
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages (history source + push target)
+        uses: actions/checkout@v7
+        with:
+          ref: gh-pages
+
+      - name: Set aside previous history (for trend graphs)
+        run: |
+          mkdir -p /tmp/prev-history
+          if [ -d history ]; then cp -r history/* /tmp/prev-history/; fi
+
+      - name: Download Allure results (chromium)
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-results-chromium
+          path: allure-results
+
+      - name: Download Allure results (firefox)
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-results-firefox
+          path: allure-results
+
+      - name: Download Allure results (webkit)
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-results-webkit
+          path: allure-results
+
+      - name: Restore previous history into results
+        run: |
+          mkdir -p allure-results/history
+          cp -r /tmp/prev-history/* allure-results/history/ 2>/dev/null || true
+
+      - name: Set up Java (for the Allure CLI)
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline
+
+      - name: Generate Allure report
+        run: allure generate allure-results --clean -o allure-report
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+          publish_branch: gh-pages
