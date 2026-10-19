@@ -72,16 +72,25 @@ All resolved:
 
 ## Phase 3 — UI layer
 
-- [ ] `BasePage` + component library: dropdown, autocomplete, date picker, data table, toast, modal
-- [ ] PIM pages (employee list/add/edit, photo upload)
-- [ ] Admin pages (user management)
-- [ ] Leave pages (apply, approve)
-- [ ] Failure artifacts wired into Allure (trace/video/screenshot on failure)
+- [x] `BasePage` (Phase 1) + component library: Dropdown, Autocomplete, DatePicker, DataTable, Toast,
+  Modal — all confirmed against the running app (roles, CSS classes, auto-dismiss timing), no
+  assertions inside any of them
+- [x] PIM pages (employee list/add/edit, photo upload): `EmployeeListPage`, `AddEmployeePage`,
+  `PersonalDetailsPage` — covers search+delete-via-modal, create+photo upload, and update (DOB +
+  dropdowns)
+- [x] Admin pages (user management): `UserManagementPage`, `AddUserPage`
+- [ ] Leave pages (apply, approve) — **blocked**: a fresh instance has no leave types/period configured
+  (`/leave/applyLeave` shows "No Leave Types with Leave Balance"); needs Admin > Leave configuration
+  (via UI or API) before these pages can be built and tested — picked up in a later pass
+- [x] Failure artifacts wired into Allure: a `pytest_runtest_makereport` hook attaches a screenshot
+  from `page`/`admin_page` on failure — verified with a deliberately failing throwaway test that the
+  attachment lands in the Allure result
 
 ## Phase 4 — Hybrid + roles
 
-- [ ] 3–5 E2E hybrid flows (API sets up state, UI verifies) — e.g. employee created via API shows in PIM;
-  leave applied in UI shows via API
+- [ ] 3–5 E2E hybrid flows (API sets up state, UI verifies) — 2 already done in Phase 3
+  (`tests/e2e/`: employee created via API shows in PIM search; admin creates a user via UI for an
+  API-created employee), 1–3 more to add; leave-applied-in-UI-shows-via-API needs Leave pages first
 - [ ] `auth/roles.py`: `Role` enum, per-role login + `storage_state`
 - [ ] `logged_in_as` parametrized fixture
 - [ ] Role tests: menu visibility (Admin vs. ESS), direct-URL access, API 401/403 checks
