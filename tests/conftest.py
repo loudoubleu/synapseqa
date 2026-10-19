@@ -1,4 +1,5 @@
 import sys
+import uuid
 from collections.abc import Generator, Iterator
 from pathlib import Path
 
@@ -12,14 +13,17 @@ from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[imp
 
 from framework.api.clients.booking_client import BookingClient
 from framework.api.clients.employee_client import EmployeeClient
-from framework.api.clients.user_client import UserClient
+from framework.api.clients.user_client import ESS_ROLE_ID, UserClient
 from framework.api.models.employee import Employee
+from framework.auth.roles import Role
 from framework.config.settings import Settings
 from framework.data.builders import EmployeeBuilder
 from framework.ui.pages.login_page import LoginPage
 
 AUTH_DIR = Path(__file__).resolve().parent.parent / ".auth"
 ADMIN_STORAGE_STATE_PATH = AUTH_DIR / "admin_state.json"
+ESS_STORAGE_STATE_PATH = AUTH_DIR / "ess_state.json"
+ESS_TEST_PASSWORD = "Aut0!RoleTest2026"
 
 
 @pytest.fixture(scope="session")
@@ -73,6 +77,71 @@ def admin_page(
     context.close()
 
 
+@pytest.fixture(scope="session")
+def ess_storage_state(
+    playwright: Playwright, browser: Browser, base_url: str, admin_storage_state: Path
+) -> Iterator[Path]:
+    AUTH_DIR.mkdir(parents=True, exist_ok=True)
+    api_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
+    employee_api = EmployeeClient(api_context, base_url)
+    user_api = UserClient(api_context, base_url)
+
+    emp = employee_api.create(first_name="RoleTest", last_name=f"auto_{uuid.uuid4().hex[:8]}")
+    user = user_api.create(
+        username=f"auto_{uuid.uuid4().hex[:8]}",
+        password=ESS_TEST_PASSWORD,
+        user_role_id=ESS_ROLE_ID,
+        emp_number=emp.emp_number,
+    )
+
+    login_context = browser.new_context(base_url=base_url)
+    login_page = LoginPage(login_context.new_page()).open()
+    dashboard = login_page.login(user.user_name, ESS_TEST_PASSWORD)
+    expect(dashboard.heading).to_be_visible()
+    login_context.storage_state(path=ESS_STORAGE_STATE_PATH)
+    login_context.close()
+
+    yield ESS_STORAGE_STATE_PATH
+
+    user_api.delete(user.id)
+    employee_api.delete(emp.emp_number)
+    api_context.dispose()
+
+
+@pytest.fixture
+def ess_page(browser: Browser, ess_storage_state: Path, settings: Settings, base_url: str) -> Iterator[Page]:
+    context = browser.new_context(base_url=base_url, storage_state=ess_storage_state)
+    context.set_default_timeout(settings.default_timeout_ms)
+    page = context.new_page()
+    yield page
+    context.close()
+
+
+@pytest.fixture
+def role(request: pytest.FixtureRequest) -> Role:
+    role_param: Role = request.param
+    return role_param
+
+
+@pytest.fixture
+def logged_in_as(
+    role: Role,
+    browser: Browser,
+    settings: Settings,
+    base_url: str,
+    admin_storage_state: Path,
+    ess_storage_state: Path,
+) -> Iterator[Page]:
+    storage_state = admin_storage_state if role is Role.ADMIN else ess_storage_state
+    context = browser.new_context(base_url=base_url, storage_state=storage_state)
+    context.set_default_timeout(settings.default_timeout_ms)
+    page = context.new_page()
+    page.goto("/web/index.php/dashboard/index")
+    page.wait_for_load_state("networkidle")
+    yield page
+    context.close()
+
+
 @pytest.fixture
 def employee_client(
     playwright: Playwright, admin_storage_state: Path, base_url: str
@@ -114,8 +183,8 @@ def pytest_runtest_makereport(
     outcome = yield
     report = outcome.get_result()
     if report.when == "call" and report.failed and isinstance(item, pytest.Function):
-        page = item.funcargs.get("page") or item.funcargs.get("admin_page")
-        if isinstance(page, Page):
+        page = next((v for v in item.funcargs.values() if isinstance(v, Page)), None)
+        if page is not None:
             allure.attach(
                 page.screenshot(), name="failure-screenshot", attachment_type=allure.attachment_type.PNG
             )
