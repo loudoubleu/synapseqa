@@ -116,7 +116,10 @@ All resolved:
   bottleneck, not CPU). Fixed a real race: `admin_storage_state`/`ess_storage_state` now key their
   filename on `$PYTEST_XDIST_WORKER` since xdist gives each worker its own session scope
 - [ ] Browser matrix (Chromium/Firefox/WebKit) in nightly
-- [ ] Dockerized test runner (`mcr.microsoft.com/playwright/python` base)
+- [x] Dockerized test runner (`mcr.microsoft.com/playwright/python` base, pinned by digest matching
+  the installed `playwright==1.64.0`) — verified it builds, joins `infra_default`, and runs real tests
+  against the live `orangehrm` service by its compose hostname (`docker run --network infra_default
+  -e TEST_ORANGEHRM_URL=http://orangehrm:80 ...`), 5/5 smoke tests passed
 - [ ] Allure report published to GitHub Pages (history across runs)
 - [ ] `.github/workflows/nightly.yml` (full regression, sharded, browser matrix)
 - [ ] `.github/workflows/demo-smoke.yml` (serial, Chromium only, no destructive tests, against public demo)

@@ -47,6 +47,7 @@ every pull request; pre-commit hooks installed locally.
 SynapseQA/
 ├── CLAUDE.md · README.md · TODO.md
 ├── pyproject.toml · uv.lock · .python-version · .gitignore
+├── Dockerfile · .dockerignore         # containerized test runner, verified against the real app
 ├── .env                               # local secrets — NEVER commit, never print values
 ├── .env.example · .pre-commit-config.yaml
 ├── .venv/                             # uv-managed virtual environment (Python 3.13.1)
@@ -81,8 +82,8 @@ SynapseQA/
     └── api/{orangehrm/{test_employees,test_users}.py, restful_booker/{test_booking_smoke,test_booking_crud}.py}
 ```
 
-Still missing from the target layout (Phase 5+, see `TODO.md`): `Dockerfile` (test runner),
-`docs/architecture.md`, `.github/workflows/{nightly,demo-smoke}.yml`.
+Still missing from the target layout (Phase 5+, see `TODO.md`): `docs/architecture.md`,
+`.github/workflows/{nightly,demo-smoke}.yml`, Allure-on-Pages.
 
 **Leave pages and Supervisor role tests are deliberately not built yet — same blocker.** A fresh seeded
 instance has no leave type or leave period configured — `/leave/applyLeave` shows "No Leave Types with
