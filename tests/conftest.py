@@ -1,9 +1,11 @@
 import sys
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from pathlib import Path
 
+import allure
 import pytest
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright, expect
+from pluggy import Result
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "infra"))
 from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[import-not-found]
@@ -103,6 +105,20 @@ def booking_client(playwright: Playwright, settings: Settings) -> Iterator[Booki
     request_context = playwright.request.new_context(base_url=booker_url)
     yield BookingClient(request_context, booker_url)
     request_context.dispose()
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(
+    item: pytest.Item, call: pytest.CallInfo[None]
+) -> Generator[None, Result[pytest.TestReport], None]:
+    outcome = yield
+    report = outcome.get_result()
+    if report.when == "call" and report.failed and isinstance(item, pytest.Function):
+        page = item.funcargs.get("page") or item.funcargs.get("admin_page")
+        if isinstance(page, Page):
+            allure.attach(
+                page.screenshot(), name="failure-screenshot", attachment_type=allure.attachment_type.PNG
+            )
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
