@@ -72,8 +72,10 @@ verified loads from `.env` and passes ruff/mypy). `tests/conftest.py` exists: se
 fixture, `base_url` override, autouse OrangeHRM readiness check (reuses `infra/wait_for_ready.py` via
 a `sys.path` insert — that script stays stdlib-only), `context` fixture override applying
 `default_timeout_ms`, and a `pytest_collection_modifyitems` hook skipping `destructive` tests when
-`TEST_ENV=demo`. `TODO.md` at the repo root tracks the full checklist derived from the plan — update
-it alongside §9 as steps land.
+`TEST_ENV=demo`. `src/framework/ui/pages/` has `base_page.py` (generic `path` + `open()` → `Self`),
+`login_page.py`, `dashboard_page.py`; `tests/ui/test_login.py` covers valid login, invalid password,
+and empty-field validation (`smoke`/`ui` markers), all passing against the local instance. `TODO.md`
+at the repo root tracks the full checklist derived from the plan — update it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 
@@ -249,6 +251,9 @@ Never change the admin's password or roles in tests; create dedicated test users
   So OrangeHRM API clients must be built from an authenticated context (`page.request`, or a
   context created from a saved `storage_state`).
 - **Login page locators:** placeholders `Username` / `Password`; button role `button`, name `Login`.
+  Invalid credentials render the text "Invalid credentials" on the login page. Submitting with both
+  fields empty renders two "Required" validation messages (one per field). Successful login lands on
+  a page with a `role=heading` element named "Dashboard".
 - **Uninstalled instance behaviour:** app pages return **500**, and `/` redirects to
   `./installer/index.php`. `wait_for_ready.py` uses this to report exit code 2.
 - **Installer:** the new console installer (`php installer/console install:on-new-database`) is

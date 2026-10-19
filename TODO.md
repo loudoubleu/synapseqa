@@ -25,9 +25,10 @@ All resolved:
   default timeout wiring, `destructive`-skip-on-demo hook — all four behaviors verified with a
   throwaway test (not committed): base_url resolves, login page loads, context timeout is 10s not
   Playwright's 30s default, and the destructive test is skipped only under `TEST_ENV=demo`
-- [ ] UI slice: `ui/pages/base_page.py`, `login_page.py`, `dashboard_page.py`
-- [ ] `tests/ui/test_login.py`: valid login → dashboard (smoke); invalid password message;
-  empty-field validation (confirm exact UI text first)
+- [x] UI slice: `ui/pages/base_page.py`, `login_page.py`, `dashboard_page.py`
+- [x] `tests/ui/test_login.py`: valid login → dashboard (smoke); invalid password message;
+  empty-field validation — verified against the running app first: "Invalid credentials" and two
+  "Required" messages (one per field); all 3 tests pass
 - [ ] Auth state fixture: log in as admin once, save `storage_state` under `.auth/` (gitignored)
 - [ ] API slice: `api/base_client.py`, `api/models/employee.py`, `api/clients/employee_client.py`
   (built from admin `storage_state`)
