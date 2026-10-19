@@ -1,0 +1,43 @@
+name: demo-smoke
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Weekly, Monday 06:00 UTC
+  workflow_dispatch:
+
+env:
+  TEST_ENV: demo
+  # OrangeHRM's own public demo and its publicly documented demo credentials (not secrets --
+  # verified against the live site; anyone can log in with these, see orangehrm.com).
+  TEST_ORANGEHRM_URL: https://opensource-demo.orangehrmlive.com
+  TEST_ADMIN_USERNAME: Admin
+  TEST_ADMIN_PASSWORD: admin123
+  TEST_BOOKER_API_URL: https://restful-booker.herokuapp.com
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.3.0
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Install Playwright Chromium
+        run: uv run playwright install --with-deps chromium
+
+      - name: Run smoke suite against the public demo (serial, chromium only, no destructive tests)
+        run: uv run pytest -m "smoke and not destructive"
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-demo
+          path: test-results/
+          retention-days: 7
