@@ -38,10 +38,12 @@ at `docs/Test_Automation_Framework_Plan.docx`.
 
 ## 2. Current state of the codebase
 
-**Phases 1–4 are complete**, except two items blocked by the same gap (Foundation, full API layer, UI
-layer, hybrid+roles — Leave pages and Supervisor role tests blocked, see below) — see `TODO.md`. Git
-repository initialized and pushed to `https://github.com/loudoubleu/synapseqa` (public); CI runs on
-every pull request; pre-commit hooks installed locally.
+**Phases 1–5 are complete**, except two Phase 4 items blocked by the same gap (Leave pages and
+Supervisor role tests, see below) — see `TODO.md`. Git repository initialized and pushed to
+`https://github.com/loudoubleu/synapseqa` (public); CI runs on every pull request; nightly (browser
+matrix) and demo-smoke (public demo) run on schedule + manual dispatch; pre-commit hooks installed
+locally. Live Allure report: **https://loudoubleu.github.io/synapseqa/** (updated after every nightly
+run, history across runs).
 
 ```
 SynapseQA/
@@ -87,8 +89,7 @@ SynapseQA/
     └── api/{orangehrm/{test_employees,test_users}.py, restful_booker/{test_booking_smoke,test_booking_crud}.py}
 ```
 
-Still missing from the target layout (Phase 5+, see `TODO.md`): `docs/architecture.md`,
-Allure-on-Pages.
+Still missing from the target layout: `docs/architecture.md` (Phase 6).
 
 **Leave pages and Supervisor role tests are deliberately not built yet — same blocker.** A fresh seeded
 instance has no leave type or leave period configured — `/leave/applyLeave` shows "No Leave Types with
@@ -404,29 +405,31 @@ disappear on its own; tests always create and delete their own data rather than 
 
 ---
 
-## 9. Exact next steps (Phases 1–4 complete, Phase 5 nearly done → one item left)
+## 9. Exact next steps (Phases 1–5 complete, except the Leave blocker → now in Phase 6)
 
-Phases 1–4 are done. Phase 5 is done except Allure-on-Pages — see `TODO.md` for the checked-off detail
-on each, and git history for how every fact was verified for real (not assumed) before being coded,
-including three real bugs found and fixed while building Phase 5: an xdist storage_state race, a
-`--browser` flag that silently ran two browsers at once, and a visual-regression baseline captured on
-the wrong OS. The two Phase 4 open items (Leave pages, Supervisor role tests) share one blocker: a fresh
-seeded instance has no leave type or leave period configured (§7) — not yet investigated.
+Phases 1–5 are done — see `TODO.md` for the checked-off detail on each, and git history for how every
+fact was verified for real (not assumed) before being coded, including real bugs found and fixed along
+the way: an xdist `storage_state` race, a `--browser` flag silently running two browsers at once, a
+visual-regression baseline captured on the wrong OS, and (Allure-on-Pages) the live page being
+CDN-cached just long enough to look like history wasn't accumulating when it actually was — caught by
+checking the deployed git content directly instead of trusting one screenshot. The two Phase 4 open
+items (Leave pages, Supervisor role tests) share one blocker: a fresh seeded instance has no leave type
+or leave period configured (§7) — not yet investigated.
 
-**One item left in Phase 5 — Allure report on GitHub Pages:**
+GitHub Pages is enabled (`gh-pages` branch, confirmed with the user before enabling since it's a public
+setting); live report at **https://loudoubleu.github.io/synapseqa/**, updated by `nightly.yml`'s
+`publish-report` job after every run.
 
-- Needs GitHub Pages enabled for the repo first (a one-time, user-visible setting — ask before
-  enabling, since it makes a page public).
-- Then: a job (in `nightly.yml`, after the matrix) that downloads all three `allure-results-*`
-  artifacts, merges them, runs the Allure CLI (needs Java — `actions/setup-java` +
-  `allure-commandline`, since the local dev machine doesn't have the CLI either, see §4) to generate
-  the HTML report, and publishes it via `actions/upload-pages-artifact` + `actions/deploy-pages`.
-  "History across runs" means fetching the previous deployment's `history/` folder before generating,
-  so trend graphs work — not just overwriting the report each time.
+**Now in Phase 6 — showcase polish** (per the roadmap and `TODO.md`):
 
-After that: Phase 6 (showcase polish — README architecture diagram refresh, "how to add a test" guide,
-demo GIF, status badges, clean commit history, a final pass for `time.sleep`/XPath/assertions-in-page-
-objects/hard-coded data).
+- README architecture diagram refresh (reflect the actual current layout, not just the Phase 1 sketch),
+  a "how to add a test" guide, a short demo GIF.
+- Status badges (CI build, Allure report link).
+- Clean commit history check — conventional commits throughout already; confirm nothing needs squashing.
+- A final pass for `time.sleep`, XPath-heavy locators, assertions inside page objects, dependence on
+  pre-existing data, hard-coded credentials — the project's own stated anti-patterns (§6).
+- Decide on and, if picked up, unblock Leave pages/Supervisor role tests (still deferred, not in scope
+  unless explicitly revisited).
 
 ---
 

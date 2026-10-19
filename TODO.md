@@ -123,7 +123,13 @@ All resolved:
   the installed `playwright==1.64.0`) — verified it builds, joins `infra_default`, and runs real tests
   against the live `orangehrm` service by its compose hostname (`docker run --network infra_default
   -e TEST_ORANGEHRM_URL=http://orangehrm:80 ...`), 5/5 smoke tests passed
-- [ ] Allure report published to GitHub Pages (history across runs)
+- [x] Allure report published to GitHub Pages (history across runs) — live at
+  https://loudoubleu.github.io/synapseqa/. GitHub Pages enabled with user confirmation first
+  (`gh-pages` branch, build_type legacy). Verified with two real `workflow_dispatch` runs: report
+  renders correctly (73 test cases, 100%, 5 suites matching the real test layout) and history
+  genuinely accumulates across runs — confirmed at the git-content level (`history-trend.json` had 1
+  entry after the first deploy, 2 after the second), not just a visual check (the live page itself was
+  CDN-cached for a few minutes, which could've been mistaken for a failure)
 - [x] `.github/workflows/nightly.yml` (full regression, sharded with `-n 4`, browser matrix) — verified
   with two real `workflow_dispatch` runs; the first failed on chromium only (visual-regression baseline
   was captured on Windows, didn't match Ubuntu's font rendering — not a real regression), fixed by

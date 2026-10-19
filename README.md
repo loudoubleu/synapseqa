@@ -84,6 +84,17 @@ uv run ruff check . ; uv run ruff format . ; uv run mypy src
 These also run automatically on commit via `pre-commit` (`uv run pre-commit install` once per clone),
 and on every pull request in CI (`.github/workflows/ci.yml`).
 
+## CI
+
+| Workflow | Trigger | What runs |
+|---|---|---|
+| `ci.yml` | Every pull request | Lint, type-check, smoke suite (Chromium) |
+| `nightly.yml` | Daily + manual | Full suite across Chromium/Firefox/WebKit, parallelized |
+| `demo-smoke.yml` | Weekly + manual | Smoke subset, serial, against the public demo |
+
+Live Allure report (updated after every `nightly.yml` run, history across runs):
+**https://loudoubleu.github.io/synapseqa/**
+
 ## Architecture Decision Records
 
 Key design decisions and their rationale live in [`docs/adr/`](docs/adr/), e.g. why tests run against a
