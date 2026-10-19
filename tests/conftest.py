@@ -3,11 +3,12 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import Browser, BrowserContext, Page, expect
+from playwright.sync_api import Browser, BrowserContext, Page, Playwright, expect
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "infra"))
 from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[import-not-found]
 
+from framework.api.clients.employee_client import EmployeeClient
 from framework.config.settings import Settings
 from framework.ui.pages.login_page import LoginPage
 
@@ -64,6 +65,15 @@ def admin_page(
     page = context.new_page()
     yield page
     context.close()
+
+
+@pytest.fixture
+def employee_client(
+    playwright: Playwright, admin_storage_state: Path, base_url: str
+) -> Iterator[EmployeeClient]:
+    request_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
+    yield EmployeeClient(request_context, base_url)
+    request_context.dispose()
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:

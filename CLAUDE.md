@@ -78,8 +78,13 @@ and empty-field validation (`smoke`/`ui` markers), all passing against the local
 `tests/conftest.py` also has a session-scoped `admin_storage_state` fixture (logs in once via a raw
 `browser.new_context()`, saves to `.auth/admin_state.json`, gitignored) and a function-scoped
 `admin_page` fixture that opens a new context from that saved state — verified a test using `admin_page`
-lands pre-authenticated with no `LoginPage` interaction needed. `TODO.md` at the repo root tracks the
-full checklist derived from the plan — update it alongside §9 as steps land.
+lands pre-authenticated with no `LoginPage` interaction needed. API layer first slice also exists:
+`api/base_client.py` (get/post/delete over `APIRequestContext`, logs method+url+status), `api/models/
+employee.py` (pydantic `Employee`/`EmployeeListResponse`), `api/clients/employee_client.py`
+(`EmployeeClient.list()`); `tests/conftest.py`'s `employee_client` fixture builds it from
+`playwright.request.new_context(storage_state=admin_storage_state)`. `tests/api/orangehrm/
+test_employees.py` passes against the real API. `TODO.md` at the repo root tracks the full checklist
+derived from the plan — update it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 
@@ -250,10 +255,11 @@ Never change the admin's password or roles in tests; create dedicated test users
   Login is `POST /web/index.php/auth/validate` with form fields `_token`, `username`, `password`.
   Success redirects to `/web/index.php/dashboard/index`; failure redirects back to login with
   `invalid_credentials`. Session cookie name: `_orangehrm`.
-- **API:** `GET /web/index.php/api/v2/pim/employees?limit=1` returns **200** with
-  `{"data":[{"empNumber":1,…}],…}` when sent with the logged-in session cookie; **401** without it.
-  So OrangeHRM API clients must be built from an authenticated context (`page.request`, or a
-  context created from a saved `storage_state`).
+- **API:** `GET /web/index.php/api/v2/pim/employees?limit=N` returns **200** with
+  `{"data":[{"empNumber":int,"firstName":str,"lastName":str,"middleName":str,"employeeId":str,
+  "terminationId":int|null}],"meta":{"total":int},"rels":[]}` when sent with the logged-in session
+  cookie; **401** without it. So OrangeHRM API clients must be built from an authenticated context
+  (`page.request`, or a `playwright.request.new_context(storage_state=...)` as `employee_client` does).
 - **Login page locators:** placeholders `Username` / `Password`; button role `button`, name `Login`.
   Invalid credentials render the text "Invalid credentials" on the login page. Submitting with both
   fields empty renders two "Required" validation messages (one per field). Successful login lands on
