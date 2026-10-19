@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  pull_request:
+
+env:
+  TEST_ENV: local
+  TEST_ORANGEHRM_URL: http://localhost:8081
+  TEST_BOOKER_API_URL: https://restful-booker.herokuapp.com
+  TEST_ADMIN_USERNAME: ${{ secrets.TEST_ADMIN_USERNAME }}
+  TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Start OrangeHRM (Docker Compose)
+        run: docker compose -f infra/docker-compose.orangehrm.yml up -d --wait
+
+      - name: Wait for OrangeHRM readiness
+        run: uv run python infra/wait_for_ready.py
+
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
+
+      - name: Lint (ruff check)
+        run: uv run ruff check .
+
+      - name: Format check (ruff format)
+        run: uv run ruff format --check .
+
+      - name: Type check (mypy)
+        run: uv run mypy src tests
+
+      - name: Run smoke tests
+        run: uv run pytest -m smoke
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Stop OrangeHRM
+        if: always()
+        run: docker compose -f infra/docker-compose.orangehrm.yml down -v

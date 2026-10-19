@@ -64,8 +64,10 @@ SynapseQA/
             └── cryptokeys/.htaccess  # from the image; no encryption key (encryption disabled)
 ```
 
-Directories from the plan that **do not exist yet**: `.github/workflows/`, `Dockerfile` (test runner),
-`README.md`.
+Directories from the plan that **do not exist yet**: `Dockerfile` (test runner), `README.md`.
+`.github/workflows/ci.yml` exists and runs on every pull request against `main`; `nightly.yml` and
+`demo-smoke.yml` are still Phase 5 work. GitHub repo secrets `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD`
+are set (via `gh secret set`, values never printed).
 `docs/` now exists, holding a copy of the plan Word doc (no `architecture.md`/`adr/` yet). `.env.example`
 exists and is committed. `src/framework/config/settings.py` exists (pydantic-settings `Settings` class,
 verified loads from `.env` and passes ruff/mypy). `tests/conftest.py` exists: session `settings`

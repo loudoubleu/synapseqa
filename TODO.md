@@ -37,8 +37,10 @@ All resolved:
   — verified against the live API first (bad auth returns 200 + `{"reason": "Bad credentials"}`, not 401)
 - [x] `.pre-commit-config.yaml` (ruff check+format, mypy); `uv run pre-commit install` — verified
   `pre-commit run --all-files` passes, and that a deliberately broken file is caught and reformatted
-- [ ] `.github/workflows/ci.yml`: checkout → setup-uv → `uv sync` → compose up --wait → readiness probe →
-  playwright install --with-deps → ruff → mypy → `pytest -m smoke` → upload `test-results/` on failure
+- [x] `.github/workflows/ci.yml`: checkout → setup-uv → `uv sync` → compose up --wait → readiness probe →
+  playwright install --with-deps → ruff → mypy → `pytest -m smoke` → upload `test-results/` on failure.
+  `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD` set as GitHub secrets (piped via `gh secret set`, never
+  printed). Verified green end-to-end via a throwaway test PR.
 - [ ] `README.md`: what it is, architecture diagram, 60-second quick start, environment table
 - [ ] First ADRs in `docs/adr/`:
   - [ ] `0001-local-docker-instance-vs-public-demo.md`
