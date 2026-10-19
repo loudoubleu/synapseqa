@@ -10,7 +10,10 @@ from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[imp
 
 from framework.api.clients.booking_client import BookingClient
 from framework.api.clients.employee_client import EmployeeClient
+from framework.api.clients.user_client import UserClient
+from framework.api.models.employee import Employee
 from framework.config.settings import Settings
+from framework.data.builders import EmployeeBuilder
 from framework.ui.pages.login_page import LoginPage
 
 AUTH_DIR = Path(__file__).resolve().parent.parent / ".auth"
@@ -75,6 +78,23 @@ def employee_client(
     request_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
     yield EmployeeClient(request_context, base_url)
     request_context.dispose()
+
+
+@pytest.fixture
+def user_client(playwright: Playwright, admin_storage_state: Path, base_url: str) -> Iterator[UserClient]:
+    request_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
+    yield UserClient(request_context, base_url)
+    request_context.dispose()
+
+
+@pytest.fixture
+def employee(employee_client: EmployeeClient) -> Iterator[Employee]:
+    builder = EmployeeBuilder()
+    created = employee_client.create(
+        first_name=builder.first_name, last_name=builder.last_name, middle_name=builder.middle_name
+    )
+    yield created
+    employee_client.delete(created.emp_number)
 
 
 @pytest.fixture
