@@ -32,8 +32,10 @@ addopts = [
     "-ra",                           # summary of skips/xfails/failures
     "--strict-markers",              # typo in a marker name = error, not a silent new marker
     "--strict-config",
-    # Playwright defaults (override on the command line, e.g. --browser firefox --headed)
-    "--browser=chromium",
+    # Playwright defaults (override on the command line, e.g. --browser firefox --headed).
+    # No --browser here: pytest-playwright already defaults to chromium when none is given,
+    # and its --browser flag is additive (action="append") -- baking chromium into addopts
+    # would make `pytest --browser firefox` run BOTH chromium and firefox, not just firefox.
     "--tracing=retain-on-failure",
     "--video=retain-on-failure",
     "--screenshot=only-on-failure",
