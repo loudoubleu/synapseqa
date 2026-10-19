@@ -74,8 +74,12 @@ a `sys.path` insert — that script stays stdlib-only), `context` fixture overri
 `default_timeout_ms`, and a `pytest_collection_modifyitems` hook skipping `destructive` tests when
 `TEST_ENV=demo`. `src/framework/ui/pages/` has `base_page.py` (generic `path` + `open()` → `Self`),
 `login_page.py`, `dashboard_page.py`; `tests/ui/test_login.py` covers valid login, invalid password,
-and empty-field validation (`smoke`/`ui` markers), all passing against the local instance. `TODO.md`
-at the repo root tracks the full checklist derived from the plan — update it alongside §9 as steps land.
+and empty-field validation (`smoke`/`ui` markers), all passing against the local instance.
+`tests/conftest.py` also has a session-scoped `admin_storage_state` fixture (logs in once via a raw
+`browser.new_context()`, saves to `.auth/admin_state.json`, gitignored) and a function-scoped
+`admin_page` fixture that opens a new context from that saved state — verified a test using `admin_page`
+lands pre-authenticated with no `LoginPage` interaction needed. `TODO.md` at the repo root tracks the
+full checklist derived from the plan — update it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 

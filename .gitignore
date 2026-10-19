@@ -26,6 +26,9 @@ htmlcov/
 !.env.example
 *.local.*
 
+# Saved Playwright storage_state (session cookies) per role
+.auth/
+
 # Editors / OS
 .idea/
 .vscode/

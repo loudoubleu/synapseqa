@@ -29,7 +29,7 @@ All resolved:
 - [x] `tests/ui/test_login.py`: valid login → dashboard (smoke); invalid password message;
   empty-field validation — verified against the running app first: "Invalid credentials" and two
   "Required" messages (one per field); all 3 tests pass
-- [ ] Auth state fixture: log in as admin once, save `storage_state` under `.auth/` (gitignored)
+- [x] Auth state fixture: log in as admin once, save `storage_state` under `.auth/` (gitignored)
 - [ ] API slice: `api/base_client.py`, `api/models/employee.py`, `api/clients/employee_client.py`
   (built from admin `storage_state`)
 - [ ] `tests/api/orangehrm/test_employees.py`: list employees → 200 + schema validation (smoke, api)

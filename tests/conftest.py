@@ -1,13 +1,18 @@
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import BrowserContext
+from playwright.sync_api import Browser, BrowserContext, Page, expect
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "infra"))
 from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[import-not-found]
 
 from framework.config.settings import Settings
+from framework.ui.pages.login_page import LoginPage
+
+AUTH_DIR = Path(__file__).resolve().parent.parent / ".auth"
+ADMIN_STORAGE_STATE_PATH = AUTH_DIR / "admin_state.json"
 
 
 @pytest.fixture(scope="session")
@@ -36,6 +41,29 @@ def _ensure_orangehrm_ready(settings: Settings) -> None:
 def context(context: BrowserContext, settings: Settings) -> BrowserContext:
     context.set_default_timeout(settings.default_timeout_ms)
     return context
+
+
+@pytest.fixture(scope="session")
+def admin_storage_state(browser: Browser, settings: Settings, base_url: str) -> Path:
+    AUTH_DIR.mkdir(parents=True, exist_ok=True)
+    login_context = browser.new_context(base_url=base_url)
+    login_page = LoginPage(login_context.new_page()).open()
+    dashboard = login_page.login(settings.admin_username, settings.admin_password.get_secret_value())
+    expect(dashboard.heading).to_be_visible()
+    login_context.storage_state(path=ADMIN_STORAGE_STATE_PATH)
+    login_context.close()
+    return ADMIN_STORAGE_STATE_PATH
+
+
+@pytest.fixture
+def admin_page(
+    browser: Browser, admin_storage_state: Path, settings: Settings, base_url: str
+) -> Iterator[Page]:
+    context = browser.new_context(base_url=base_url, storage_state=admin_storage_state)
+    context.set_default_timeout(settings.default_timeout_ms)
+    page = context.new_page()
+    yield page
+    context.close()
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
