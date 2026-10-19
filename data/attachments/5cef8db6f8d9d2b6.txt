@@ -1,0 +1,4 @@
+INFO     framework.api.base_client:base_client.py:21 GET http://localhost:8081/web/index.php/api/v2/pim/employees/11
+INFO     framework.api.base_client:base_client.py:23 -> 200 http://localhost:8081/web/index.php/api/v2/pim/employees/11
+INFO     framework.api.base_client:base_client.py:57 DELETE http://localhost:8081/web/index.php/api/v2/pim/employees
+INFO     framework.api.base_client:base_client.py:59 -> 200 http://localhost:8081/web/index.php/api/v2/pim/employees
