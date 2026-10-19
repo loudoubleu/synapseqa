@@ -56,12 +56,19 @@ All resolved:
 
 ## Phase 2 — API layer
 
-- [ ] `BaseClient` (wraps `APIRequestContext`, logging, `expect(resp).to_be_ok()` helpers)
-- [ ] OrangeHRM `employee_client.py` / `user_client.py` (CRUD, search, pagination, validation errors)
-- [ ] Restful Booker full suite: CRUD, token auth (valid/invalid/missing), chained requests,
-  negative/boundary inputs, data-driven cases, response-time thresholds
-- [ ] Data builders with cleanup: `EmployeeBuilder`, `UserBuilder`, `BookingBuilder` (Faker, `auto_<uuid>` prefix)
-- [ ] Negative-path tests for both APIs
+- [x] `BaseClient` (wraps `APIRequestContext`, logging) — done in Phase 1; PUT/PATCH + headers
+  passthrough added here for Booker's token-as-Cookie-header writes
+- [x] OrangeHRM `employee_client.py` / `user_client.py`: create/get/update/delete for employees
+  (update via `/personal-details`, confirmed — bare `PUT /employees/{id}` is 403), create/get/delete
+  for users (confirmed role IDs: Admin=1, ESS=2; app enforces password complexity)
+  — search/pagination beyond a plain `limit` param not yet added (not currently needed by any test)
+- [x] Restful Booker full suite: CRUD (create/get/update/partial-update/delete, chained in one
+  round-trip test), token auth incl. writes-without-auth → 403, negative/boundary inputs (missing
+  required fields → a documented 500 quirk, not our bug; empty/zero values accepted), data-driven
+  parametrized cases, a response-time threshold
+- [x] Data builders with cleanup: `EmployeeBuilder`, `UserBuilder`, `BookingBuilder` (Faker,
+  `auto_<uuid>` prefix) — verified no leftover test records after a full run
+- [x] Negative-path tests for both APIs (422 validation errors on OrangeHRM; 403/500 on Booker)
 
 ## Phase 3 — UI layer
 

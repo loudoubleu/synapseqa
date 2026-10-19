@@ -38,9 +38,9 @@ at `docs/Test_Automation_Framework_Plan.docx`.
 
 ## 2. Current state of the codebase
 
-**Phase 1 (Foundation) is complete** — all 12 steps in §9 are done. Git repository initialized and
-pushed to `https://github.com/loudoubleu/synapseqa` (public); CI runs on every pull request; pre-commit
-hooks installed locally.
+**Phase 1 (Foundation) is complete; Phase 2 (full API layer) is complete too** — see `TODO.md`. Git
+repository initialized and pushed to `https://github.com/loudoubleu/synapseqa` (public); CI runs on
+every pull request; pre-commit hooks installed locally.
 
 ```
 SynapseQA/
@@ -59,21 +59,21 @@ SynapseQA/
 │   └── seed/{orangehrm.sql, confs/{Conf.php, cryptokeys/.htaccess}}
 ├── src/framework/
 │   ├── config/settings.py             # pydantic-settings Settings, local/demo
+│   ├── data/builders.py               # EmployeeBuilder, UserBuilder, BookingBuilder (Faker)
 │   ├── ui/pages/{base_page,login_page,dashboard_page}.py
 │   └── api/
-│       ├── base_client.py             # wraps APIRequestContext: get/post/delete + logging
-│       ├── models/{employee,booking}.py
-│       └── clients/{employee_client,booking_client}.py
+│       ├── base_client.py             # wraps APIRequestContext: get/post/put/patch/delete_json + logging
+│       ├── models/{common,employee,user,booking}.py
+│       └── clients/{employee_client,user_client,booking_client}.py
 └── tests/
-    ├── conftest.py                    # settings/base_url/readiness + admin auth-state + client fixtures
+    ├── conftest.py                    # settings/base_url/readiness + auth-state + all API client fixtures
     ├── ui/test_login.py
-    └── api/{orangehrm/test_employees.py, restful_booker/test_booking_smoke.py}
+    └── api/{orangehrm/{test_employees,test_users}.py, restful_booker/{test_booking_smoke,test_booking_crud}.py}
 ```
 
-Still missing from the target layout (Phase 2+, see `TODO.md`): `Dockerfile` (test runner),
+Still missing from the target layout (Phase 3+, see `TODO.md`): `Dockerfile` (test runner),
 `docs/architecture.md`, `.github/workflows/{nightly,demo-smoke}.yml`, the component library,
-PIM/Admin/Leave pages, per-role auth (`auth/roles.py`), employee/user CRUD clients beyond `list()`, and
-data builders.
+PIM/Admin/Leave pages, per-role auth (`auth/roles.py`).
 
 GitHub repo secrets `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD` are set (via `gh secret set`, values
 never printed). History was rewritten once early on (commits `929aaac`..`3a1f5f1`) to drop an unwanted
@@ -248,11 +248,24 @@ Never change the admin's password or roles in tests; create dedicated test users
   Login is `POST /web/index.php/auth/validate` with form fields `_token`, `username`, `password`.
   Success redirects to `/web/index.php/dashboard/index`; failure redirects back to login with
   `invalid_credentials`. Session cookie name: `_orangehrm`.
-- **API:** `GET /web/index.php/api/v2/pim/employees?limit=N` returns **200** with
-  `{"data":[{"empNumber":int,"firstName":str,"lastName":str,"middleName":str,"employeeId":str,
-  "terminationId":int|null}],"meta":{"total":int},"rels":[]}` when sent with the logged-in session
-  cookie; **401** without it. So OrangeHRM API clients must be built from an authenticated context
-  (`page.request`, or a `playwright.request.new_context(storage_state=...)` as `employee_client` does).
+- **API — employees:** `GET .../pim/employees?limit=N` → **200**, `{"data":[{...}],"meta":{"total":int},
+  "rels":[]}`; **401** unauthenticated. `employeeId` is `str | None` (`null` until assigned — a newly
+  created employee has no employee ID, unlike the seeded admin's `"0001"`). `POST .../pim/employees`
+  with just `{firstName, lastName}` → **200** `{"data":{...employee...},"meta":[],"rels":[]}` (note:
+  `meta` is `[]` here, a `dict` with `"total"` only on the **list** endpoint — two different shapes for
+  the same key name). `GET .../pim/employees/{empNumber}` → same single-employee shape.
+  **`PUT .../pim/employees/{empNumber}` is 403** — the real update endpoint is
+  `PUT .../pim/employees/{empNumber}/personal-details`, which returns more fields (otherId,
+  nationality, …) that the `Employee` model simply ignores (pydantic's default `extra="ignore"`).
+  `DELETE .../pim/employees` takes `{"ids":[...]}` → `{"data":[<empNumber>,...]}`. Missing a required
+  field → **422** `{"error":{"status":"422","message":"Invalid Parameter","data":
+  {"invalidParamKeys":["lastName"]}}}`.
+- **API — admin users:** `GET/POST/DELETE .../admin/users` follow the same envelope/ID-list pattern as
+  employees. A user needs `username`, `password`, `userRoleId`, `empNumber`, `status` — confirmed
+  **role IDs: `1` = Admin, `2` = ESS** (`src/framework/api/clients/user_client.py` exposes
+  `ADMIN_ROLE_ID`/`ESS_ROLE_ID`). The app enforces password complexity server-side (a plain lowercase
+  password like `"weak"` is rejected with the same 422 shape, keyed `"password"`); Faker's
+  `password(special_chars=True, digits=True, upper_case=True, lower_case=True)` satisfies it.
 - **Login page locators:** placeholders `Username` / `Password`; button role `button`, name `Login`.
   Invalid credentials render the text "Invalid credentials" on the login page. Submitting with both
   fields empty renders two "Required" validation messages (one per field). Successful login lands on
@@ -264,14 +277,21 @@ Never change the admin's password or roles in tests; create dedicated test users
   DB-snapshot approach.
 - Image layout: web root `/var/www/html` (declared as a Docker VOLUME), config at
   `/var/www/html/lib/confs/Conf.php`, PHP 8.3, `curl` available in the container.
-- Still **unverified** (check against the running app before hard-coding): other API paths/payloads
-  (create/delete employee, admin users), each role's menu items, the access-denied behaviour for ESS users.
+- Still **unverified** (check against the running app before hard-coding, needed for Phase 4): each
+  role's menu items, the access-denied behaviour for ESS users hitting admin pages/API endpoints.
 
 **Restful Booker facts verified:** `POST /auth` with valid credentials (`admin`/`password123`, the
 service's own public demo credentials) returns **200** `{"token": "..."}`; with bad credentials it
 still returns **200**, body `{"reason": "Bad credentials"}` — never 401/403, so `BookingClient.
 authenticate()` returns `None` rather than raising. `GET /booking` returns **200** with a JSON array of
-`{"bookingid": int}`.
+`{"bookingid": int}`. `POST /booking` → **200** `{"bookingid":int,"booking":{...}}`; `GET /booking/{id}`
+→ the bare booking object (no `bookingid` wrapper). Writes (`PUT`/`PATCH`/`DELETE` on `/booking/{id}`)
+need the token sent as a **`Cookie: token=<token>` header**, not `Authorization`; without it they
+return **403**. `DELETE` on success returns **201**, not 200/204 (a known quirk). `GET` on a deleted/
+nonexistent booking → **404**. `POST /booking` with a required field missing entirely → **500**
+(a documented quirk of this demo API, not treated as our bug); empty strings and `0` values are
+accepted fine. The service's storage is ephemeral/shared — a booking created by a one-off script can
+disappear on its own; tests always create and delete their own data rather than relying on persistence.
 
 ---
 
@@ -291,26 +311,26 @@ authenticate()` returns `None` rather than raising. `GET /booking` returns **200
 
 ---
 
-## 9. Exact next steps (Phase 1 complete → now in Phase 2)
+## 9. Exact next steps (Phase 1 and Phase 2 complete → now in Phase 3)
 
-Phase 1's 12 steps (git init, `.env.example`, `src/framework/` + `Settings`, root `conftest.py`, UI
-login slice, admin auth-state fixtures, OrangeHRM API first slice, Restful Booker smoke,
-`.pre-commit-config.yaml`, CI workflow, README, first three ADRs) are all done — see `TODO.md` for the
-checked-off detail on each, and git history for how each was verified before committing.
+Phase 1 (12 steps: git init through the first three ADRs) and Phase 2 (full `EmployeeClient`/
+`UserClient` CRUD with 422-contract tests, the full Restful Booker CRUD + negative/data-driven/
+timing suite, Faker-backed data builders) are both done — see `TODO.md` for the checked-off detail,
+and git history for how each fact was verified against the real app/API before being coded.
 
-**Now in Phase 2 — full API layer** (per the roadmap and `TODO.md`):
+**Now in Phase 3 — UI layer** (per the roadmap and `TODO.md`):
 
-- Flesh out `BaseClient`/`EmployeeClient` with create/update/delete, search and pagination, and
-  validation-error (4xx) cases — confirm each real payload against the running app first (§7 lists
-  what's still unverified: create/delete employee, admin users).
-- Add `UserClient` for OrangeHRM admin-user management.
-- Expand the Restful Booker client into the full suite: CRUD, valid/invalid/missing token auth,
-  chained requests, negative/boundary inputs, data-driven cases, response-time thresholds.
-- Add `src/framework/data/builders.py` (Faker-backed `EmployeeBuilder`, `UserBuilder`,
-  `BookingBuilder`, `auto_<uuid>`-prefixed) with fixture teardown that always cleans up.
+- Build the component library for OrangeHRM's custom widgets: dropdown (not a native `<select>`),
+  autocomplete, date picker, data table, toast, modal — as reusable classes under
+  `src/framework/ui/components/`, not duplicated per page.
+- Add PIM pages (employee list/add/edit, photo upload), Admin pages (user management), Leave pages
+  (apply/approve) under `src/framework/ui/pages/`.
+- Wire failure artifacts (trace/video/screenshot on failure) into Allure reporting.
+- Confirm each page's real locators/text against the running app first, the same way `LoginPage` and
+  the API clients were — never assume.
 
-After Phase 2: Phase 3 (component library, PIM/Admin/Leave pages), Phase 4 (hybrid E2E +
-Admin/ESS/Supervisor role tests, network mocking, visual + a11y), Phase 5 (xdist, browser matrix,
+After Phase 3: Phase 4 (hybrid E2E + Admin/ESS/Supervisor role tests, network mocking, visual + a11y —
+needs the still-unverified role menu/access-denied facts in §7), Phase 5 (xdist, browser matrix,
 Dockerized runner, Allure on GitHub Pages, nightly + demo-smoke workflows), Phase 6 (showcase polish).
 
 ---
