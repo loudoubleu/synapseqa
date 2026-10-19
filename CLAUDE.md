@@ -183,11 +183,20 @@ uv run playwright install            # browsers (CI: add --with-deps chromium)
 uv run pytest -m smoke
 uv run pytest -m "api and not destructive"
 uv run pytest --headed --browser firefox
-uv run pytest -n auto                # parallel (local env only)
+uv run pytest -n 4                   # parallel (local env only) — see note below on worker count
 
 # Quality
 uv run ruff check . ; uv run ruff format . ; uv run mypy src
 ```
+
+**On `-n` worker count:** `-n auto` (16 on this machine) was measurably *slower* than `-n 4`
+(50s vs. 21s for the full suite, confirmed by running both) — OrangeHRM is a single Docker container
+with one PHP-FPM/MariaDB backend, so past a handful of concurrent browsers it becomes the bottleneck,
+not client-side CPU. `-n 4`–`-n 8` is the sweet spot locally; re-measure if the container gets more
+resources. Session-scoped fixtures that persist to disk (`admin_storage_state`, `ess_storage_state`)
+key their filename on `$PYTEST_XDIST_WORKER` (falls back to `"master"` outside xdist) — xdist gives
+each worker its own session scope, so without a worker-unique filename, parallel workers racing to
+write/read the same `.auth/admin_state.json` is a real (if intermittent) bug, not a hypothetical one.
 
 ---
 

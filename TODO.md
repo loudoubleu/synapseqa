@@ -111,7 +111,10 @@ All resolved:
 
 ## Phase 5 — Scale + polish
 
-- [ ] `pytest-xdist` parallel runs (local env only)
+- [x] `pytest-xdist` parallel runs (local env only) — verified `-n 4` passes reliably (2 consecutive
+  runs) and is faster than both serial and `-n auto`/16 workers (single OrangeHRM container is the
+  bottleneck, not CPU). Fixed a real race: `admin_storage_state`/`ess_storage_state` now key their
+  filename on `$PYTEST_XDIST_WORKER` since xdist gives each worker its own session scope
 - [ ] Browser matrix (Chromium/Firefox/WebKit) in nightly
 - [ ] Dockerized test runner (`mcr.microsoft.com/playwright/python` base)
 - [ ] Allure report published to GitHub Pages (history across runs)

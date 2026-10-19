@@ -72,7 +72,7 @@ Switching is configuration-only (`TEST_ENV=local` or `TEST_ENV=demo`) — no tes
 uv run pytest -m smoke                       # fast, critical-path checks
 uv run pytest -m "api and not destructive"   # API tests, skip anything destructive
 uv run pytest --headed --browser firefox     # watch it run in a real browser window
-uv run pytest -n auto                        # parallel (local env only)
+uv run pytest -n 4                           # parallel (local env only)
 ```
 
 ## Quality gates

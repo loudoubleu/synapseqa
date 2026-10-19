@@ -1,3 +1,4 @@
+import os
 import sys
 import uuid
 from collections.abc import Generator, Iterator
@@ -20,9 +21,13 @@ from framework.config.settings import Settings
 from framework.data.builders import EmployeeBuilder
 from framework.ui.pages.login_page import LoginPage
 
+# xdist gives each worker its own session scope, so session-scoped fixtures that write to
+# a shared path (admin/ESS storage_state) need a worker-unique filename, or parallel workers
+# can read a half-written file from another worker.
+WORKER_ID = os.environ.get("PYTEST_XDIST_WORKER", "master")
 AUTH_DIR = Path(__file__).resolve().parent.parent / ".auth"
-ADMIN_STORAGE_STATE_PATH = AUTH_DIR / "admin_state.json"
-ESS_STORAGE_STATE_PATH = AUTH_DIR / "ess_state.json"
+ADMIN_STORAGE_STATE_PATH = AUTH_DIR / f"admin_state.{WORKER_ID}.json"
+ESS_STORAGE_STATE_PATH = AUTH_DIR / f"ess_state.{WORKER_ID}.json"
 ESS_TEST_PASSWORD = "Aut0!RoleTest2026"
 
 
