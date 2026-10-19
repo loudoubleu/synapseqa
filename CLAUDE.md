@@ -1,7 +1,7 @@
 # CLAUDE.md — SynapseQA
 
 This file is the hand-off context for Claude Code. Read it fully before making changes.
-Last updated: 2026-10-18.
+Last updated: 2026-10-19.
 
 ---
 
@@ -30,70 +30,54 @@ cookie; Restful Booker uses a token.
 5. **Role-based tests.** Prove Admin vs. ESS (regular employee) access at both UI and API level.
 6. Aim for **40–60 high-quality tests**, not hundreds of shallow ones.
 
-The full design plan is a Word document outside this repo:
-`C:\Users\louaw\Claude_Local_Session\Test_Automation_Framework_Plan.docx` (13 sections: goals, apps,
-environment strategy, stack, architecture, layout, design examples, role-based tests, coverage,
-CI/CD, roadmap, showcase tips, open decisions). Consider copying it into `docs/`.
+The full design plan (13 sections: goals, apps, environment strategy, stack, architecture, layout,
+design examples, role-based tests, coverage, CI/CD, roadmap, showcase tips, open decisions) is committed
+at `docs/Test_Automation_Framework_Plan.docx`.
 
 ---
 
 ## 2. Current state of the codebase
 
-**Phase 1 (Foundation) is partly done.** Infrastructure and tooling exist and are verified;
-no framework code or real tests have been written yet. **Git repository initialized**
-(first commit `929aaac chore: bootstrap project`; pushed to
-`https://github.com/loudoubleu/synapseqa`). History was rewritten once (`929aaac`..`3a1f5f1`) to drop
-an unwanted `Co-Authored-By: Claude` trailer — do not add that trailer to future commits.
+**Phase 1 (Foundation) is complete** — all 12 steps in §9 are done. Git repository initialized and
+pushed to `https://github.com/loudoubleu/synapseqa` (public); CI runs on every pull request; pre-commit
+hooks installed locally.
 
 ```
 SynapseQA/
-├── CLAUDE.md                         # this file
-├── pyproject.toml                    # deps + pytest/ruff/mypy config (see §4)
-├── uv.lock                           # locked dependency versions
-├── .python-version                   # 3.13
-├── .gitignore                        # ignores .venv, caches, test output, .env
-├── .env                              # local secrets — NEVER commit, never print values
-├── .venv/                            # uv-managed virtual environment (Python 3.13.1)
-└── infra/
-    ├── docker-compose.orangehrm.yml  # OrangeHRM + MariaDB, starts pre-installed from seed
-    ├── wait_for_ready.py             # readiness probe (stdlib only)
-    └── seed/
-        ├── orangehrm.sql             # MariaDB dump taken right after the install wizard
-        └── confs/
-            ├── Conf.php              # OrangeHRM DB config written by the installer
-            └── cryptokeys/.htaccess  # from the image; no encryption key (encryption disabled)
+├── CLAUDE.md · README.md · TODO.md
+├── pyproject.toml · uv.lock · .python-version · .gitignore
+├── .env                               # local secrets — NEVER commit, never print values
+├── .env.example · .pre-commit-config.yaml
+├── .venv/                             # uv-managed virtual environment (Python 3.13.1)
+├── .github/workflows/ci.yml           # runs on every pull request; nightly/demo-smoke are Phase 5
+├── docs/
+│   ├── Test_Automation_Framework_Plan.docx
+│   └── adr/0001-…  0002-…  0003-…     # no architecture.md yet
+├── infra/
+│   ├── docker-compose.orangehrm.yml   # OrangeHRM + MariaDB, starts pre-installed from seed
+│   ├── wait_for_ready.py              # readiness probe (stdlib only)
+│   └── seed/{orangehrm.sql, confs/{Conf.php, cryptokeys/.htaccess}}
+├── src/framework/
+│   ├── config/settings.py             # pydantic-settings Settings, local/demo
+│   ├── ui/pages/{base_page,login_page,dashboard_page}.py
+│   └── api/
+│       ├── base_client.py             # wraps APIRequestContext: get/post/delete + logging
+│       ├── models/{employee,booking}.py
+│       └── clients/{employee_client,booking_client}.py
+└── tests/
+    ├── conftest.py                    # settings/base_url/readiness + admin auth-state + client fixtures
+    ├── ui/test_login.py
+    └── api/{orangehrm/test_employees.py, restful_booker/test_booking_smoke.py}
 ```
 
-Directories from the plan that **do not exist yet**: `Dockerfile` (test runner), `README.md`.
-`.github/workflows/ci.yml` exists and runs on every pull request against `main`; `nightly.yml` and
-`demo-smoke.yml` are still Phase 5 work. GitHub repo secrets `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD`
-are set (via `gh secret set`, values never printed).
-`docs/` now exists, holding a copy of the plan Word doc (no `architecture.md`/`adr/` yet). `.env.example`
-exists and is committed. `src/framework/config/settings.py` exists (pydantic-settings `Settings` class,
-verified loads from `.env` and passes ruff/mypy). `tests/conftest.py` exists: session `settings`
-fixture, `base_url` override, autouse OrangeHRM readiness check (reuses `infra/wait_for_ready.py` via
-a `sys.path` insert — that script stays stdlib-only), `context` fixture override applying
-`default_timeout_ms`, and a `pytest_collection_modifyitems` hook skipping `destructive` tests when
-`TEST_ENV=demo`. `src/framework/ui/pages/` has `base_page.py` (generic `path` + `open()` → `Self`),
-`login_page.py`, `dashboard_page.py`; `tests/ui/test_login.py` covers valid login, invalid password,
-and empty-field validation (`smoke`/`ui` markers), all passing against the local instance.
-`tests/conftest.py` also has a session-scoped `admin_storage_state` fixture (logs in once via a raw
-`browser.new_context()`, saves to `.auth/admin_state.json`, gitignored) and a function-scoped
-`admin_page` fixture that opens a new context from that saved state — verified a test using `admin_page`
-lands pre-authenticated with no `LoginPage` interaction needed. API layer first slice also exists:
-`api/base_client.py` (get/post/delete over `APIRequestContext`, logs method+url+status), `api/models/
-employee.py` (pydantic `Employee`/`EmployeeListResponse`), `api/clients/employee_client.py`
-(`EmployeeClient.list()`); `tests/conftest.py`'s `employee_client` fixture builds it from
-`playwright.request.new_context(storage_state=admin_storage_state)`. `tests/api/orangehrm/
-test_employees.py` passes against the real API. Restful Booker smoke also exists: `api/models/
-booking.py` (`BookingIdSummary`), `api/clients/booking_client.py` (`authenticate()` → token or `None`,
-`list_booking_ids()`), a `booking_client` fixture (no auth needed for these calls), and
-`tests/api/restful_booker/test_booking_smoke.py` — both passing against the live public API.
-`.pre-commit-config.yaml` exists: local hooks (`language: system`) that just call `uv run ruff check`,
-`uv run ruff format`, `uv run mypy src tests` — deliberately not the `ruff-pre-commit`/`mirrors-mypy`
-repos, since those install their own isolated tool versions via `pip` instead of reusing this project's
-`uv`-managed `.venv`. `uv run pre-commit install` has been run locally. `TODO.md` at the repo root
-tracks the full checklist derived from the plan — update it alongside §9 as steps land.
+Still missing from the target layout (Phase 2+, see `TODO.md`): `Dockerfile` (test runner),
+`docs/architecture.md`, `.github/workflows/{nightly,demo-smoke}.yml`, the component library,
+PIM/Admin/Leave pages, per-role auth (`auth/roles.py`), employee/user CRUD clients beyond `list()`, and
+data builders.
+
+GitHub repo secrets `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD` are set (via `gh secret set`, values
+never printed). History was rewritten once early on (commits `929aaac`..`3a1f5f1`) to drop an unwanted
+`Co-Authored-By: Claude` trailer — do not add that trailer to future commits.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 
@@ -307,75 +291,36 @@ authenticate()` returns `None` rather than raising. `GET /booking` returns **200
 
 ---
 
-## 9. Exact next steps (Phase 1 → Phase 2)
+## 9. Exact next steps (Phase 1 complete → now in Phase 2)
 
-Work through these in order. Each step should leave `ruff`, `mypy` and the test suite green.
+Phase 1's 12 steps (git init, `.env.example`, `src/framework/` + `Settings`, root `conftest.py`, UI
+login slice, admin auth-state fixtures, OrangeHRM API first slice, Restful Booker smoke,
+`.pre-commit-config.yaml`, CI workflow, README, first three ADRs) are all done — see `TODO.md` for the
+checked-off detail on each, and git history for how each was verified before committing.
 
-1. **Initialise git.** `git init`, confirm `.env` and `.venv` are ignored, then make the first commit
-   (conventional commit style, e.g. `chore: bootstrap project`).
-2. **Add `.env.example`** with placeholders (no real values):
-   `TEST_ENV=local`, `TEST_ORANGEHRM_URL=http://localhost:8081`, `TEST_ADMIN_USERNAME=`,
-   `TEST_ADMIN_PASSWORD=`, `TEST_BOOKER_API_URL=https://restful-booker.herokuapp.com`.
-   Add `TEST_ORANGEHRM_URL` and `TEST_BOOKER_API_URL` to `.env` too (ask the user, since it's their file).
-3. **Create `src/framework/` package** (`__init__.py` files) and `config/settings.py`:
-   ```python
-   class Settings(BaseSettings):
-       model_config = SettingsConfigDict(env_file=".env", env_prefix="TEST_", extra="ignore")
-       env: Literal["local", "demo"] = "local"
-       orangehrm_url: HttpUrl = HttpUrl("http://localhost:8081")
-       admin_username: str
-       admin_password: SecretStr
-       booker_api_url: HttpUrl = HttpUrl("https://restful-booker.herokuapp.com")
-       default_timeout_ms: int = 10_000
+**Now in Phase 2 — full API layer** (per the roadmap and `TODO.md`):
 
-       @property
-       def is_shared_env(self) -> bool:
-           return self.env == "demo"
-   ```
-4. **Create `tests/conftest.py`** with:
-   - session-scoped `settings` fixture;
-   - override pytest-playwright's `base_url` fixture to return `settings.orangehrm_url`;
-   - a session-scoped autouse readiness check for `local` (reuse the logic in `infra/wait_for_ready.py`);
-   - set the default timeout on `page`/`context` from settings;
-   - a `pytest_collection_modifyitems` hook that skips `destructive` tests when `settings.is_shared_env`.
-5. **UI layer, first slice:** `ui/pages/base_page.py` (holds `page`, `open()` using a `path` attribute),
-   `login_page.py`, `dashboard_page.py`. Then `tests/ui/test_login.py`:
-   - `smoke`: valid admin login lands on the dashboard;
-   - invalid password shows "Invalid credentials";
-   - empty fields show "Required" validation (confirm exact text in the app first).
-6. **Auth state:** session fixture that logs in as admin once and saves `storage_state`
-   (e.g. under `.auth/`, add it to `.gitignore`); an `admin_page` fixture using it.
-7. **API layer, first slice:** `api/base_client.py` wrapping `APIRequestContext` (base URL, logging,
-   `expect(resp).to_be_ok()` helpers); `api/models/employee.py` (pydantic); `api/clients/employee_client.py`
-   built from the admin `storage_state`. Test `tests/api/orangehrm/test_employees.py` (`smoke`, `api`):
-   list employees returns 200 and validates against the model.
-8. **Restful Booker smoke:** `booking_client.py` with token auth (`POST /auth`), test `GET /booking`
-   and `POST /auth` with bad credentials.
-9. **`.pre-commit-config.yaml`:** ruff (check + format) and mypy; run `uv run pre-commit install`.
-10. **CI (`.github/workflows/ci.yml`)** on pull requests: checkout → `astral-sh/setup-uv` → `uv sync` →
-    `docker compose -f infra/docker-compose.orangehrm.yml up -d --wait` →
-    `uv run python infra/wait_for_ready.py` → `uv run playwright install --with-deps chromium` →
-    ruff → mypy → `uv run pytest -m smoke` → upload `test-results/` on failure.
-    Admin credentials come from GitHub secrets (`TEST_ADMIN_USERNAME`, `TEST_ADMIN_PASSWORD`).
-11. **README.md:** what the project is, architecture diagram, 60-second quick start
-    (Compose up → `uv sync` → `uv run playwright install` → `uv run pytest -m smoke`), environment table.
-12. **First ADRs in `docs/adr/`:** `0001-local-docker-instance-vs-public-demo.md`,
-    `0002-playwright-api-context-over-requests.md`, `0003-pydantic-for-contract-checks.md`.
+- Flesh out `BaseClient`/`EmployeeClient` with create/update/delete, search and pagination, and
+  validation-error (4xx) cases — confirm each real payload against the running app first (§7 lists
+  what's still unverified: create/delete employee, admin users).
+- Add `UserClient` for OrangeHRM admin-user management.
+- Expand the Restful Booker client into the full suite: CRUD, valid/invalid/missing token auth,
+  chained requests, negative/boundary inputs, data-driven cases, response-time thresholds.
+- Add `src/framework/data/builders.py` (Faker-backed `EmployeeBuilder`, `UserBuilder`,
+  `BookingBuilder`, `auto_<uuid>`-prefixed) with fixture teardown that always cleans up.
 
-After that, continue with the roadmap: Phase 2 (full API layer, builders with cleanup, negative tests),
-Phase 3 (component library, PIM/Admin/Leave pages), Phase 4 (hybrid E2E + Admin/ESS/Supervisor role tests,
-network mocking, visual + a11y), Phase 5 (xdist, browser matrix, Dockerized runner, Allure on GitHub
-Pages, nightly + demo-smoke workflows), Phase 6 (showcase polish).
+After Phase 2: Phase 3 (component library, PIM/Admin/Leave pages), Phase 4 (hybrid E2E +
+Admin/ESS/Supervisor role tests, network mocking, visual + a11y), Phase 5 (xdist, browser matrix,
+Dockerized runner, Allure on GitHub Pages, nightly + demo-smoke workflows), Phase 6 (showcase polish).
 
 ---
 
 ## 10. Open decisions (ask the user; don't decide silently)
 
-None currently open. **Decided:** reporting is Allure (§4); Supervisor role tests are in scope for
-Phase 4, not a stretch goal (§9); `Details.jpg` was intentionally deleted.
-
-**Decided:** Reporting is **Allure** (already wired in `addopts`; the CLI needs Java and isn't installed
-locally yet — results still write to `reports/allure-results` without it).
+None currently open. **Decided:** reporting is **Allure** (already wired in `addopts`; the CLI needs
+Java and isn't installed locally yet — results still write to `reports/allure-results` without it);
+Supervisor role tests are in scope for Phase 4, not a stretch goal (§9); `Details.jpg` was intentionally
+deleted.
 
 ## 11. Working agreements for Claude
 

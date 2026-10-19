@@ -41,11 +41,11 @@ All resolved:
   playwright install --with-deps → ruff → mypy → `pytest -m smoke` → upload `test-results/` on failure.
   `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD` set as GitHub secrets (piped via `gh secret set`, never
   printed). Verified green end-to-end via a throwaway test PR.
-- [ ] `README.md`: what it is, architecture diagram, 60-second quick start, environment table
-- [ ] First ADRs in `docs/adr/`:
-  - [ ] `0001-local-docker-instance-vs-public-demo.md`
-  - [ ] `0002-playwright-api-context-over-requests.md`
-  - [ ] `0003-pydantic-for-contract-checks.md`
+- [x] `README.md`: what it is, architecture diagram, 60-second quick start, environment table
+- [x] First ADRs in `docs/adr/`:
+  - [x] `0001-local-docker-instance-vs-public-demo.md`
+  - [x] `0002-playwright-api-context-over-requests.md`
+  - [x] `0003-pydantic-for-contract-checks.md`
 
 ## Facts to verify against the running app before hard-coding (blocks role/API work)
 
