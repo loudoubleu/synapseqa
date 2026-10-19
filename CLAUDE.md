@@ -51,10 +51,15 @@ SynapseQA/
 ├── .env                               # local secrets — NEVER commit, never print values
 ├── .env.example · .pre-commit-config.yaml
 ├── .venv/                             # uv-managed virtual environment (Python 3.13.1)
-├── .github/workflows/ci.yml           # runs on every pull request; nightly/demo-smoke are Phase 5
+├── .github/workflows/
+│   ├── ci.yml                          # every pull request: lint, mypy, smoke (chromium)
+│   ├── nightly.yml                     # daily + manual: full suite × {chromium,firefox,webkit}, -n 4
+│   └── demo-smoke.yml                  # weekly + manual: smoke subset, serial, vs. the public demo
 ├── docs/
 │   ├── Test_Automation_Framework_Plan.docx
 │   └── adr/0001-…  0002-…  0003-…     # no architecture.md yet
+├── __snapshots__/                     # visual-regression baselines — committed; generated on Linux
+│                                       # (the Dockerized runner), NOT locally on Windows — see §7
 ├── infra/
 │   ├── docker-compose.orangehrm.yml   # OrangeHRM + MariaDB, starts pre-installed from seed
 │   ├── wait_for_ready.py              # readiness probe (stdlib only)
@@ -83,7 +88,7 @@ SynapseQA/
 ```
 
 Still missing from the target layout (Phase 5+, see `TODO.md`): `docs/architecture.md`,
-`.github/workflows/{nightly,demo-smoke}.yml`, Allure-on-Pages.
+Allure-on-Pages.
 
 **Leave pages and Supervisor role tests are deliberately not built yet — same blocker.** A fresh seeded
 instance has no leave type or leave period configured — `/leave/applyLeave` shows "No Leave Types with
@@ -344,7 +349,29 @@ Never change the admin's password or roles in tests; create dedicated test users
   Node.js/`@playwright/test`-only API that CLAUDE.md's plan assumed existed. Used
   `pytest-playwright-visual-snapshot`'s `assert_snapshot(page, name=...)` fixture instead (same
   baseline/compare/diff workflow). Baselines live in `__snapshots__/` and **are committed**; diff
-  output on a failing run goes to `snapshot_failures/` (gitignored).
+  output on a failing run goes to `snapshot_failures/` (gitignored). **Baselines must be generated on
+  Linux, not Windows** — a Windows-captured baseline failed nightly.yml's very first real run on
+  chromium (OS-level font rendering/anti-aliasing differences against Ubuntu, not a real regression).
+  Regenerate via the Dockerized runner against the live app, e.g. (PowerShell, from the repo root, with
+  `infra-...` compose stack already up):
+  `docker run --rm --network infra_default -e TEST_ORANGEHRM_URL=http://orangehrm:80
+  -e TEST_ADMIN_USERNAME=... -e TEST_ADMIN_PASSWORD=... -v ${PWD}/__snapshots__:/app/__snapshots__
+  --entrypoint uv synapseqa-tests run pytest tests/ui/test_visual_regression.py --update-snapshots`
+  — then review the diff image before committing. (In Git Bash on Windows, the same command needs
+  `MSYS_NO_PATHCONV=1` prefixed, or the `-v` mount silently fails to write back to the host — it was
+  hit for real building this.) Visual regression only runs on chromium (`browser_name` fixture, skip
+  otherwise) since baselines are rendering-engine-specific and firefox/webkit have none. **Consequence:
+  `test_login_page_visual_regression` is now expected to fail when run locally on this Windows dev
+  machine** (confirmed: `uv run pytest` reproduces it) — the committed baseline matches Linux
+  rendering, not Windows. That's correct, not a regression: trust this check from CI or the Dockerized
+  runner, not a bare local Windows run.
+- **Browser matrix note:** pytest-playwright's `--browser` flag is additive
+  (`action="append"`) and the plugin already defaults to chromium with none given, so `addopts` must
+  **not** bake in `--browser=chromium` — doing so made `pytest --browser firefox` run chromium *and*
+  firefox together, silently (fixed; see git history on `pyproject.toml`).
+- **Public demo (`https://opensource-demo.orangehrmlive.com`) login (confirmed):** `Admin` / `admin123`
+  — OrangeHRM's own publicly documented demo credentials, not secrets; `demo-smoke.yml` sets them as
+  plain `env:` values, not GitHub secrets.
 
 **Restful Booker facts verified:** `POST /auth` with valid credentials (`admin`/`password123`, the
 service's own public demo credentials) returns **200** `{"token": "..."}`; with bad credentials it
@@ -377,27 +404,29 @@ disappear on its own; tests always create and delete their own data rather than 
 
 ---
 
-## 9. Exact next steps (Phases 1–4 complete, except the Leave blocker → now in Phase 5)
+## 9. Exact next steps (Phases 1–4 complete, Phase 5 nearly done → one item left)
 
-Phases 1–4 are done — see `TODO.md` for the checked-off detail on each, and git history for how every
-fact was verified against the real app/API before being coded. The two open items (Leave pages,
-Supervisor role tests) share one blocker: a fresh seeded instance has no leave type or leave period
-configured (§7). Picking that up means either configuring it via Admin > Leave in the UI once and
-re-snapshotting `infra/seed/orangehrm.sql`, or finding the right API payload — neither investigated yet.
+Phases 1–4 are done. Phase 5 is done except Allure-on-Pages — see `TODO.md` for the checked-off detail
+on each, and git history for how every fact was verified for real (not assumed) before being coded,
+including three real bugs found and fixed while building Phase 5: an xdist storage_state race, a
+`--browser` flag that silently ran two browsers at once, and a visual-regression baseline captured on
+the wrong OS. The two Phase 4 open items (Leave pages, Supervisor role tests) share one blocker: a fresh
+seeded instance has no leave type or leave period configured (§7) — not yet investigated.
 
-**Now in Phase 5 — scale + polish** (per the roadmap and `TODO.md`):
+**One item left in Phase 5 — Allure report on GitHub Pages:**
 
-- `pytest-xdist` parallel runs (local env only — never against the public demo, §11).
-- Browser matrix (Chromium/Firefox/WebKit) for the nightly workflow.
-- A Dockerized test runner image (`mcr.microsoft.com/playwright/python` base per the plan).
-- Allure report published to GitHub Pages, with history across runs.
-- `.github/workflows/nightly.yml` (full regression, sharded, browser matrix) and `demo-smoke.yml`
-  (serial, Chromium only, against the public demo, no destructive tests — `TEST_ENV=demo` already makes
-  the suite behave correctly for this, confirmed in Phase 1/2/3/4 testing).
+- Needs GitHub Pages enabled for the repo first (a one-time, user-visible setting — ask before
+  enabling, since it makes a page public).
+- Then: a job (in `nightly.yml`, after the matrix) that downloads all three `allure-results-*`
+  artifacts, merges them, runs the Allure CLI (needs Java — `actions/setup-java` +
+  `allure-commandline`, since the local dev machine doesn't have the CLI either, see §4) to generate
+  the HTML report, and publishes it via `actions/upload-pages-artifact` + `actions/deploy-pages`.
+  "History across runs" means fetching the previous deployment's `history/` folder before generating,
+  so trend graphs work — not just overwriting the report each time.
 
-After Phase 5: Phase 6 (showcase polish — README architecture diagram refresh, "how to add a test"
-guide, demo GIF, status badges, clean commit history, a final pass for `time.sleep`/XPath/assertions-in-
-page-objects/hard-coded data).
+After that: Phase 6 (showcase polish — README architecture diagram refresh, "how to add a test" guide,
+demo GIF, status badges, clean commit history, a final pass for `time.sleep`/XPath/assertions-in-page-
+objects/hard-coded data).
 
 ---
 

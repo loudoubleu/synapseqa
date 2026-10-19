@@ -115,14 +115,23 @@ All resolved:
   runs) and is faster than both serial and `-n auto`/16 workers (single OrangeHRM container is the
   bottleneck, not CPU). Fixed a real race: `admin_storage_state`/`ess_storage_state` now key their
   filename on `$PYTEST_XDIST_WORKER` since xdist gives each worker its own session scope
-- [ ] Browser matrix (Chromium/Firefox/WebKit) in nightly
+- [x] Browser matrix (Chromium/Firefox/WebKit) in nightly — found and fixed a real bug along the way:
+  `addopts` baked in `--browser=chromium`, and pytest-playwright's `--browser` is additive, so
+  `pytest --browser firefox` was silently running chromium *and* firefox together; removed it since
+  the plugin already defaults to chromium with none given
 - [x] Dockerized test runner (`mcr.microsoft.com/playwright/python` base, pinned by digest matching
   the installed `playwright==1.64.0`) — verified it builds, joins `infra_default`, and runs real tests
   against the live `orangehrm` service by its compose hostname (`docker run --network infra_default
   -e TEST_ORANGEHRM_URL=http://orangehrm:80 ...`), 5/5 smoke tests passed
 - [ ] Allure report published to GitHub Pages (history across runs)
-- [ ] `.github/workflows/nightly.yml` (full regression, sharded, browser matrix)
-- [ ] `.github/workflows/demo-smoke.yml` (serial, Chromium only, no destructive tests, against public demo)
+- [x] `.github/workflows/nightly.yml` (full regression, sharded with `-n 4`, browser matrix) — verified
+  with two real `workflow_dispatch` runs; the first failed on chromium only (visual-regression baseline
+  was captured on Windows, didn't match Ubuntu's font rendering — not a real regression), fixed by
+  regenerating the baseline inside the Dockerized runner (Linux, same browser build CI uses); second
+  run green on all three browsers
+- [x] `.github/workflows/demo-smoke.yml` (serial, Chromium only, no destructive tests, against public
+  demo) — verified with a real `workflow_dispatch` run, green first try. Uses the demo site's own
+  publicly documented login (`Admin`/`admin123`, confirmed against the live site)
 
 ## Phase 6 — Showcase polish
 
