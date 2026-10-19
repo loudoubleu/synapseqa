@@ -5,11 +5,13 @@ description = "UI + API test automation framework (Playwright, Pytest, Python) f
 requires-python = ">=3.12"
 dependencies = [
     "allure-pytest>=2.16.2",
+    "axe-playwright-python>=0.1.8",
     "faker>=40.43.0",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.0",
     "pytest>=9.1.1",
     "pytest-playwright>=0.10.0",
+    "pytest-playwright-visual-snapshot>=0.5.1",
     "pytest-rerunfailures>=16.7",
     "pytest-xdist>=3.8.0",
 ]

@@ -20,6 +20,9 @@ playwright-report/
 .coverage
 htmlcov/
 
+# Visual regression diff output on failure (baselines in __snapshots__/ ARE committed)
+snapshot_failures/
+
 # Secrets and local config (commit .env.example instead)
 .env
 .env.*
