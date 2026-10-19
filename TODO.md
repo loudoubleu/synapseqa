@@ -106,3 +106,4 @@ All resolved:
 
 - [ ] ~40–60 total tests across: OrangeHRM API, Restful Booker API, UI, E2E/hybrid (3–5), roles,
   network mocking — not hundreds of shallow ones
+
