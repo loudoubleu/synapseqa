@@ -64,8 +64,8 @@ SynapseQA/
             └── cryptokeys/.htaccess  # from the image; no encryption key (encryption disabled)
 ```
 
-Directories from the plan that **do not exist yet**: `tests/`,
-`.github/workflows/`, `Dockerfile` (test runner), `.pre-commit-config.yaml`, `README.md`.
+Directories from the plan that **do not exist yet**: `.github/workflows/`, `Dockerfile` (test runner),
+`README.md`.
 `docs/` now exists, holding a copy of the plan Word doc (no `architecture.md`/`adr/` yet). `.env.example`
 exists and is committed. `src/framework/config/settings.py` exists (pydantic-settings `Settings` class,
 verified loads from `.env` and passes ruff/mypy). `tests/conftest.py` exists: session `settings`
@@ -86,8 +86,12 @@ employee.py` (pydantic `Employee`/`EmployeeListResponse`), `api/clients/employee
 test_employees.py` passes against the real API. Restful Booker smoke also exists: `api/models/
 booking.py` (`BookingIdSummary`), `api/clients/booking_client.py` (`authenticate()` → token or `None`,
 `list_booking_ids()`), a `booking_client` fixture (no auth needed for these calls), and
-`tests/api/restful_booker/test_booking_smoke.py` — both passing against the live public API. `TODO.md`
-at the repo root tracks the full checklist derived from the plan — update it alongside §9 as steps land.
+`tests/api/restful_booker/test_booking_smoke.py` — both passing against the live public API.
+`.pre-commit-config.yaml` exists: local hooks (`language: system`) that just call `uv run ruff check`,
+`uv run ruff format`, `uv run mypy src tests` — deliberately not the `ruff-pre-commit`/`mirrors-mypy`
+repos, since those install their own isolated tool versions via `pip` instead of reusing this project's
+`uv`-managed `.venv`. `uv run pre-commit install` has been run locally. `TODO.md` at the repo root
+tracks the full checklist derived from the plan — update it alongside §9 as steps land.
 
 ### `.env` keys (values are local test credentials — do not echo them)
 

@@ -35,7 +35,8 @@ All resolved:
 - [x] `tests/api/orangehrm/test_employees.py`: list employees → 200 + schema validation (smoke, api)
 - [x] Restful Booker smoke: `booking_client.py` (token auth), `GET /booking`, bad-credentials `POST /auth`
   — verified against the live API first (bad auth returns 200 + `{"reason": "Bad credentials"}`, not 401)
-- [ ] `.pre-commit-config.yaml` (ruff check+format, mypy); `uv run pre-commit install`
+- [x] `.pre-commit-config.yaml` (ruff check+format, mypy); `uv run pre-commit install` — verified
+  `pre-commit run --all-files` passes, and that a deliberately broken file is caught and reformatted
 - [ ] `.github/workflows/ci.yml`: checkout → setup-uv → `uv sync` → compose up --wait → readiness probe →
   playwright install --with-deps → ruff → mypy → `pytest -m smoke` → upload `test-results/` on failure
 - [ ] `README.md`: what it is, architecture diagram, 60-second quick start, environment table
