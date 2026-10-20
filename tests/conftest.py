@@ -13,6 +13,7 @@ from wait_for_ready import NotInstalledError, wait_for_ready  # type: ignore[imp
 
 from framework.api.clients.booking_client import BookingClient
 from framework.api.clients.employee_client import EmployeeClient
+from framework.api.clients.leave_client import LeaveClient
 from framework.api.clients.user_client import ESS_ROLE_ID, UserClient
 from framework.api.models.employee import Employee
 from framework.auth.roles import Role
@@ -160,6 +161,13 @@ def employee_client(
 def user_client(playwright: Playwright, admin_storage_state: Path, base_url: str) -> Iterator[UserClient]:
     request_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
     yield UserClient(request_context, base_url)
+    request_context.dispose()
+
+
+@pytest.fixture
+def leave_client(playwright: Playwright, admin_storage_state: Path, base_url: str) -> Iterator[LeaveClient]:
+    request_context = playwright.request.new_context(base_url=base_url, storage_state=admin_storage_state)
+    yield LeaveClient(request_context, base_url)
     request_context.dispose()
 
 

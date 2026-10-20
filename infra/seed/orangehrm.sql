@@ -107,6 +107,7 @@ INSERT INTO `hs_hr_config` VALUES
 ('instance.identifier','VHVuZ3N0ZW5Db2RlX2xvdS53aWxsaWFtc0BnbWFpbC5jb21fTG91aXNfV2lsbGlhbXNfbG9jYWxob3N0OjgwODFfVVNfNS45XzE3OTIyNjU3NzM='),
 ('instance.reg_consent','1'),
 ('instance.version','5.9.0'),
+('leave_period_defined','Yes'),
 ('leave.entitlement_consumption_algorithm','FIFOEntitlementConsumptionStrategy'),
 ('leave.include_pending_leave_in_balance','1'),
 ('leave.leavePeriodStatus','1'),
@@ -1261,7 +1262,7 @@ CREATE TABLE `hs_hr_employee` (
   CONSTRAINT `hs_hr_employee_ibfk_4` FOREIGN KEY (`emp_status`) REFERENCES `ohrm_employment_status` (`id`) ON DELETE SET NULL,
   CONSTRAINT `hs_hr_employee_ibfk_5` FOREIGN KEY (`eeo_cat_code`) REFERENCES `ohrm_job_category` (`id`) ON DELETE SET NULL,
   CONSTRAINT `hs_hr_employee_ibfk_6` FOREIGN KEY (`termination_id`) REFERENCES `ohrm_emp_termination` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=290 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1489,7 +1490,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `hs_hr_unique_id` WRITE;
 /*!40000 ALTER TABLE `hs_hr_unique_id` DISABLE KEYS */;
 INSERT INTO `hs_hr_unique_id` VALUES
-(1,1,'hs_hr_employee','emp_number');
+(1,266,'hs_hr_employee','emp_number');
 /*!40000 ALTER TABLE `hs_hr_unique_id` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -16610,7 +16611,7 @@ CREATE TABLE `ohrm_leave` (
   KEY `leave_type_id` (`leave_type_id`),
   CONSTRAINT `ohrm_leave_ibfk_1` FOREIGN KEY (`leave_request_id`) REFERENCES `ohrm_leave_request` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ohrm_leave_ibfk_2` FOREIGN KEY (`leave_type_id`) REFERENCES `ohrm_leave_type` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16690,7 +16691,7 @@ CREATE TABLE `ohrm_leave_entitlement` (
   CONSTRAINT `ohrm_leave_entitlement_ibfk_2` FOREIGN KEY (`emp_number`) REFERENCES `hs_hr_employee` (`emp_number`) ON DELETE CASCADE,
   CONSTRAINT `ohrm_leave_entitlement_ibfk_3` FOREIGN KEY (`entitlement_type`) REFERENCES `ohrm_leave_entitlement_type` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ohrm_leave_entitlement_ibfk_4` FOREIGN KEY (`created_by_id`) REFERENCES `ohrm_user` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16751,7 +16752,7 @@ CREATE TABLE `ohrm_leave_leave_entitlement` (
   KEY `leave_id` (`leave_id`),
   CONSTRAINT `ohrm_leave_leave_entitlement_ibfk_1` FOREIGN KEY (`entitlement_id`) REFERENCES `ohrm_leave_entitlement` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ohrm_leave_leave_entitlement_ibfk_2` FOREIGN KEY (`leave_id`) REFERENCES `ohrm_leave` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16779,7 +16780,7 @@ CREATE TABLE `ohrm_leave_period_history` (
   `leave_period_start_day` int(11) NOT NULL,
   `created_at` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16789,6 +16790,8 @@ CREATE TABLE `ohrm_leave_period_history` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `ohrm_leave_period_history` WRITE;
 /*!40000 ALTER TABLE `ohrm_leave_period_history` DISABLE KEYS */;
+INSERT INTO `ohrm_leave_period_history` VALUES
+(1,1,1,'2026-10-20');
 /*!40000 ALTER TABLE `ohrm_leave_period_history` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -16811,7 +16814,7 @@ CREATE TABLE `ohrm_leave_request` (
   KEY `ohrm_leave_request_ibfk_1` (`emp_number`),
   CONSTRAINT `ohrm_leave_request_ibfk_1` FOREIGN KEY (`emp_number`) REFERENCES `hs_hr_employee` (`emp_number`) ON DELETE CASCADE,
   CONSTRAINT `ohrm_leave_request_ibfk_2` FOREIGN KEY (`leave_type_id`) REFERENCES `ohrm_leave_type` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16913,7 +16916,7 @@ CREATE TABLE `ohrm_leave_type` (
   PRIMARY KEY (`id`),
   KEY `operational_country_id` (`operational_country_id`),
   CONSTRAINT `ohrm_leave_type_ibfk_1` FOREIGN KEY (`operational_country_id`) REFERENCES `ohrm_operational_country` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16923,6 +16926,8 @@ CREATE TABLE `ohrm_leave_type` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `ohrm_leave_type` WRITE;
 /*!40000 ALTER TABLE `ohrm_leave_type` DISABLE KEYS */;
+INSERT INTO `ohrm_leave_type` VALUES
+(1,'Annual Leave',0,0,NULL);
 /*!40000 ALTER TABLE `ohrm_leave_type` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -17005,7 +17010,7 @@ CREATE TABLE `ohrm_login` (
   `user_role_predefined` tinyint(1) NOT NULL,
   `login_time` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -17016,7 +17021,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `ohrm_login` WRITE;
 /*!40000 ALTER TABLE `ohrm_login` DISABLE KEYS */;
 INSERT INTO `ohrm_login` VALUES
-(1,1,'loudoubleu','Admin',1,'2026-10-17 19:45:07');
+(1,1,'loudoubleu','Admin',1,'2026-10-20 16:10:22'),
+(2,1,'loudoubleu','Admin',1,'2026-10-20 16:12:31');
 /*!40000 ALTER TABLE `ohrm_login` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -17151,15 +17157,15 @@ INSERT INTO `ohrm_menu_item` VALUES
 (39,'Reports',45,30,2,400,1,NULL),
 (40,'My Info',46,NULL,1,700,1,'{\"icon\":\"myinfo\"}'),
 (41,'Leave',68,NULL,1,300,1,'{\"icon\":\"leave\"}'),
-(42,'Configure',NULL,41,2,500,0,NULL),
-(43,'Leave Period',47,42,3,100,0,NULL),
-(44,'Leave Types',7,42,3,200,0,NULL),
-(45,'Work Week',14,42,3,300,0,NULL),
-(46,'Holidays',11,42,3,400,0,NULL),
-(48,'Leave List',16,41,2,600,0,NULL),
-(49,'Assign Leave',17,41,2,700,0,NULL),
-(50,'My Leave',48,41,2,200,0,NULL),
-(51,'Apply',49,41,2,100,0,NULL),
+(42,'Configure',NULL,41,2,500,1,NULL),
+(43,'Leave Period',47,42,3,100,1,NULL),
+(44,'Leave Types',7,42,3,200,1,NULL),
+(45,'Work Week',14,42,3,300,1,NULL),
+(46,'Holidays',11,42,3,400,1,NULL),
+(48,'Leave List',16,41,2,600,1,NULL),
+(49,'Assign Leave',17,41,2,700,1,NULL),
+(50,'My Leave',48,41,2,200,1,NULL),
+(51,'Apply',49,41,2,100,1,NULL),
 (52,'Time',67,NULL,1,400,1,'{\"icon\":\"time\"}'),
 (53,'Timesheets',NULL,52,2,100,0,NULL),
 (54,'My Timesheets',51,53,3,100,0,NULL),
@@ -17176,13 +17182,13 @@ INSERT INTO `ohrm_menu_item` VALUES
 (65,'Recruitment',76,NULL,1,500,1,'{\"icon\":\"recruitment\"}'),
 (66,'Candidates',60,65,2,100,1,NULL),
 (67,'Vacancies',61,65,2,200,1,NULL),
-(74,'Entitlements',NULL,41,2,300,0,NULL),
-(75,'Add Entitlements',72,74,3,100,0,NULL),
-(76,'My Entitlements',70,74,3,300,0,NULL),
-(77,'Employee Entitlements',69,74,3,200,0,NULL),
-(78,'Reports',NULL,41,2,400,0,NULL),
-(79,'Leave Entitlements and Usage Report',78,78,3,100,0,NULL),
-(80,'My Leave Entitlements and Usage Report',79,78,3,200,0,NULL),
+(74,'Entitlements',NULL,41,2,300,1,NULL),
+(75,'Add Entitlements',72,74,3,100,1,NULL),
+(76,'My Entitlements',70,74,3,300,1,NULL),
+(77,'Employee Entitlements',69,74,3,200,1,NULL),
+(78,'Reports',NULL,41,2,400,1,NULL),
+(79,'Leave Entitlements and Usage Report',78,78,3,100,1,NULL),
+(80,'My Leave Entitlements and Usage Report',79,78,3,200,1,NULL),
 (81,'Users',1,2,3,100,1,NULL),
 (82,'Dashboard',103,NULL,1,800,1,'{\"icon\":\"dashboard\"}'),
 (83,'Performance',130,NULL,1,700,1,'{\"icon\":\"performance\"}'),
@@ -18379,7 +18385,7 @@ CREATE TABLE `ohrm_registration_event_queue` (
   `publish_time` datetime DEFAULT NULL,
   `data` longtext DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -18391,7 +18397,9 @@ LOCK TABLES `ohrm_registration_event_queue` WRITE;
 /*!40000 ALTER TABLE `ohrm_registration_event_queue` DISABLE KEYS */;
 INSERT INTO `ohrm_registration_event_queue` VALUES
 (1,0,1,'2026-10-17 19:36:13','2026-10-17 19:36:13','{\"username\":\"loudoubleu\",\"email\":\"lou.williams@gmail.com\",\"telephone\":\"\",\"admin_first_name\":\"Louis\",\"admin_last_name\":\"Williams\",\"timezone\":\"Not Captured\",\"language\":\"en_US\",\"country\":\"US\",\"organization_name\":\"TungstenCode\",\"type\":\"0\",\"instance_identifier\":\"VHVuZ3N0ZW5Db2RlX2xvdS53aWxsaWFtc0BnbWFpbC5jb21fTG91aXNfV2lsbGlhbXNfbG9jYWxob3N0OjgwODFfVVNfNS45XzE3OTIyNjU3NzM=\",\"system_details\":\"{\\\"os\\\":{\\\"os\\\":\\\"Linux\\\",\\\"release_name\\\":\\\"6.18.54.1-microsoft-standard-WSL2\\\",\\\"version_info\\\":\\\"#1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026\\\"},\\\"php\\\":{\\\"version\\\":\\\"8.3.31\\\"},\\\"mysql\\\":{\\\"client_version\\\":\\\"mysqlnd 8.3.31\\\",\\\"server_version\\\":\\\"11.8.9-MariaDB-ubu2404\\\",\\\"conn_type\\\":\\\"db via TCP\\\\\\/IP\\\"},\\\"server\\\":\\\"Apache\\\\\\/2.4.67 (Debian)\\\",\\\"ohrm\\\":{\\\"version\\\":\\\"5.9\\\"}}\"}'),
-(2,3,1,'2026-10-17 19:37:32','2026-10-17 19:37:32','{\"instance_identifier\":\"VHVuZ3N0ZW5Db2RlX2xvdS53aWxsaWFtc0BnbWFpbC5jb21fTG91aXNfV2lsbGlhbXNfbG9jYWxob3N0OjgwODFfVVNfNS45XzE3OTIyNjU3NzM=\",\"type\":3,\"system_details\":\"{\\\"os\\\":{\\\"os\\\":\\\"Linux\\\",\\\"release_name\\\":\\\"6.18.54.1-microsoft-standard-WSL2\\\",\\\"version_info\\\":\\\"#1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026\\\"},\\\"php\\\":{\\\"version\\\":\\\"8.3.31\\\"},\\\"mysql\\\":{\\\"client_version\\\":\\\"mysqlnd 8.3.31\\\",\\\"server_version\\\":\\\"11.8.9-MariaDB-ubu2404\\\",\\\"conn_type\\\":\\\"db via TCP\\\\\\/IP\\\"},\\\"server\\\":\\\"Apache\\\\\\/2.4.67 (Debian)\\\",\\\"ohrm\\\":{\\\"version\\\":\\\"5.9\\\"}}\"}');
+(2,3,1,'2026-10-17 19:37:32','2026-10-17 19:37:32','{\"instance_identifier\":\"VHVuZ3N0ZW5Db2RlX2xvdS53aWxsaWFtc0BnbWFpbC5jb21fTG91aXNfV2lsbGlhbXNfbG9jYWxob3N0OjgwODFfVVNfNS45XzE3OTIyNjU3NzM=\",\"type\":3,\"system_details\":\"{\\\"os\\\":{\\\"os\\\":\\\"Linux\\\",\\\"release_name\\\":\\\"6.18.54.1-microsoft-standard-WSL2\\\",\\\"version_info\\\":\\\"#1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026\\\"},\\\"php\\\":{\\\"version\\\":\\\"8.3.31\\\"},\\\"mysql\\\":{\\\"client_version\\\":\\\"mysqlnd 8.3.31\\\",\\\"server_version\\\":\\\"11.8.9-MariaDB-ubu2404\\\",\\\"conn_type\\\":\\\"db via TCP\\\\\\/IP\\\"},\\\"server\\\":\\\"Apache\\\\\\/2.4.67 (Debian)\\\",\\\"ohrm\\\":{\\\"version\\\":\\\"5.9\\\"}}\"}'),
+(3,1,1,'2026-10-19 21:11:08','2026-10-19 22:27:11','{\"username\":\"Not Captured\",\"email\":\"lou.williams@gmail.com\",\"telephone\":\"\",\"admin_first_name\":\"Louis\",\"admin_last_name\":\"Williams\",\"timezone\":\"UTC\",\"language\":\"en_US\",\"country\":\"US\",\"organization_name\":\"TungstenCode\",\"instance_identifier\":\"VHVuZ3N0ZW5Db2RlX2xvdS53aWxsaWFtc0BnbWFpbC5jb21fTG91aXNfV2lsbGlhbXNfbG9jYWxob3N0OjgwODFfVVNfNS45XzE3OTIyNjU3NzM=\",\"system_details\":\"{\\\"os\\\":{\\\"os\\\":\\\"Linux\\\",\\\"release_name\\\":\\\"6.18.54.1-microsoft-standard-WSL2\\\",\\\"version_info\\\":\\\"#1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026\\\"},\\\"php\\\":{\\\"version\\\":\\\"8.3.31\\\"},\\\"mysql\\\":{\\\"client_version\\\":\\\"Not captured\\\",\\\"server_version\\\":\\\"11.8.9-MariaDB-ubu2404\\\",\\\"conn_type\\\":\\\"Not captured\\\"},\\\"server\\\":\\\"Apache\\\\\\/2.4.67 (Debian)\\\",\\\"ohrm\\\":{\\\"version\\\":\\\"5.9\\\"}}\",\"employee_count\":9}'),
+(4,1,1,'2026-10-19 21:11:11','2026-10-19 22:27:12','{\"username\":\"Not Captured\",\"email\":\"lou.williams@gmail.com\",\"telephone\":\"\",\"admin_first_name\":\"Louis\",\"admin_last_name\":\"Williams\",\"timezone\":\"UTC\",\"language\":\"en_US\",\"country\":\"US\",\"organization_name\":\"TungstenCode\",\"instance_identifier\":\"VHVuZ3N0ZW5Db2RlX2xvdS53aWxsaWFtc0BnbWFpbC5jb21fTG91aXNfV2lsbGlhbXNfbG9jYWxob3N0OjgwODFfVVNfNS45XzE3OTIyNjU3NzM=\",\"system_details\":\"{\\\"os\\\":{\\\"os\\\":\\\"Linux\\\",\\\"release_name\\\":\\\"6.18.54.1-microsoft-standard-WSL2\\\",\\\"version_info\\\":\\\"#1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026\\\"},\\\"php\\\":{\\\"version\\\":\\\"8.3.31\\\"},\\\"mysql\\\":{\\\"client_version\\\":\\\"Not captured\\\",\\\"server_version\\\":\\\"11.8.9-MariaDB-ubu2404\\\",\\\"conn_type\\\":\\\"Not captured\\\"},\\\"server\\\":\\\"Apache\\\\\\/2.4.67 (Debian)\\\",\\\"ohrm\\\":{\\\"version\\\":\\\"5.9\\\"}}\",\"employee_count\":10}');
 /*!40000 ALTER TABLE `ohrm_registration_event_queue` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -19446,7 +19454,7 @@ CREATE TABLE `ohrm_user` (
   KEY `created_by` (`created_by`),
   CONSTRAINT `ohrm_user_ibfk_1` FOREIGN KEY (`emp_number`) REFERENCES `hs_hr_employee` (`emp_number`) ON DELETE CASCADE,
   CONSTRAINT `ohrm_user_ibfk_2` FOREIGN KEY (`user_role_id`) REFERENCES `ohrm_user_role` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=138 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -20955,4 +20963,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-10-17 19:50:56
+-- Dump completed on 2026-10-20 16:12:55

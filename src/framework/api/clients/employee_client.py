@@ -37,3 +37,11 @@ class EmployeeClient(BaseClient):
     def delete(self, *emp_numbers: int) -> list[int]:
         response = self.delete_json(self.base_path, data={"ids": list(emp_numbers)})
         return EmployeeDeleteResponse.model_validate(response.json()).data
+
+    def assign_supervisor(
+        self, emp_number: int, *, supervisor_emp_number: int, reporting_method_id: int = 1
+    ) -> None:
+        self.post(
+            f"{self.base_path}/{emp_number}/supervisors",
+            data={"empNumber": supervisor_emp_number, "reportingMethodId": reporting_method_id},
+        )
