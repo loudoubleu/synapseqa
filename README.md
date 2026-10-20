@@ -161,6 +161,13 @@ and on every pull request in CI (`.github/workflows/ci.yml`).
 Live Allure report (updated after every `nightly.yml` run, history across runs):
 **https://loudoubleu.github.io/synapseqa/**
 
+## Build it yourself
+
+[`docs/TUTORIAL.md`](docs/TUTORIAL.md) walks through building a framework like this one from scratch —
+not just the checklist of what got built (`TODO.md`), but the discovery methodology behind it: how to
+find real API payloads and locators by watching the running app rather than guessing, the pitfalls hit
+along the way, and a worked case study (unblocking the Leave module) showing that process end to end.
+
 ## Architecture Decision Records
 
 Key design decisions and their rationale live in [`docs/adr/`](docs/adr/), e.g. why tests run against a
