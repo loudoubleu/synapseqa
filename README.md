@@ -9,6 +9,8 @@ A portfolio-grade test automation framework built with **Playwright + Pytest + P
 way a production SDET team would build it: maintainable, layered, CI-ready, and easy to explain in an
 interview. It tests both a web UI and its backing REST API from one shared framework.
 
+![Demo: an employee created via the API shows up in a UI search — the flagship hybrid test pattern, captured live against the running app](docs/media/demo.gif)
+
 ## Applications under test
 
 | App | Role | Where |
