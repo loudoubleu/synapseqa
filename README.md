@@ -29,6 +29,18 @@ Restful Booker uses a bearer token.
 4. **The code is the showcase** — type hints, linting, clean layers, documented decisions (ADRs).
 5. **Role-based tests** — prove Admin vs. ESS (regular employee) access at both UI and API level.
 
+## Test coverage
+
+**33 tests**, all real scenarios (no padding to hit a round number):
+
+| Layer | Count | What it covers |
+|---|---|---|
+| `tests/ui/` | 9 | Login, PIM add/edit/delete, network mocking, visual regression, accessibility |
+| `tests/api/orangehrm/` | 5 | Employee + user CRUD against the OrangeHRM REST API |
+| `tests/api/restful_booker/` | 10 | Token auth, full CRUD, negative/boundary inputs, response-time check |
+| `tests/e2e/` | 4 | Hybrid flows — API sets up state, UI verifies it (or vice versa), including leave applied in the UI showing up via the API |
+| `tests/roles/` | 5 | Admin vs. ESS menu/access checks, plus a Supervisor approving a direct report's leave request |
+
 ## Architecture
 
 ```
@@ -58,19 +70,20 @@ src/framework/
 ├── auth/roles.py              # Role enum + expected per-role menu
 ├── data/builders.py           # Faker-backed EmployeeBuilder, UserBuilder, BookingBuilder
 ├── ui/
-│   ├── pages/                 # BasePage + login/dashboard + pim/ and admin/ subpackages
+│   ├── pages/                 # BasePage + login/dashboard + pim/, admin/, leave/ subpackages
 │   └── components/            # Dropdown, Autocomplete, DatePicker, DataTable, Toast, Modal, SideMenu
 └── api/
     ├── base_client.py         # wraps Playwright's APIRequestContext (get/post/put/patch/delete_json)
     ├── models/                # pydantic request/response schemas (contract checks)
-    └── clients/                # EmployeeClient, UserClient, BookingClient
+    └── clients/                # EmployeeClient, UserClient, BookingClient, LeaveClient
 
 tests/
 ├── conftest.py                 # settings, auth-state (admin + ESS), all API client fixtures
 ├── ui/        # OrangeHRM UI: login, PIM, visual regression, a11y, network mocking
 ├── api/        # orangehrm/ and restful_booker/ — pure API tests
-├── e2e/        # hybrid: API sets up state, UI verifies it
-└── roles/      # Admin vs. ESS access tests
+├── e2e/        # hybrid: API sets up state, UI verifies it — including leave applied in the UI
+│               # showing up via the API
+└── roles/      # Admin vs. ESS access tests, plus a Supervisor approving a direct report's leave
 ```
 
 ### How to add a test
@@ -157,5 +170,8 @@ check.
 
 ## Project status
 
-This project is under active development. See [`TODO.md`](TODO.md) for the live, phase-by-phase
-checklist and what's done so far.
+**Complete.** All 6 planned phases are done — foundation, API layer, UI layer, hybrid/role tests,
+scale/CI polish, and showcase polish — including the Leave module (apply/approve, Supervisor role
+test), which was unblocked in a final pass after the rest of the suite was green. Final count: 33
+tests, a deliberate stop short of the original 40–60 estimate rather than padding with low-value
+coverage. See [`TODO.md`](TODO.md) for the full phase-by-phase checklist.
