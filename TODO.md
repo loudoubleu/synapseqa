@@ -79,26 +79,33 @@ All resolved:
   `PersonalDetailsPage` — covers search+delete-via-modal, create+photo upload, and update (DOB +
   dropdowns)
 - [x] Admin pages (user management): `UserManagementPage`, `AddUserPage`
-- [ ] Leave pages (apply, approve) — **blocked**: a fresh instance has no leave types/period configured
-  (`/leave/applyLeave` shows "No Leave Types with Leave Balance"); needs Admin > Leave configuration
-  (via UI or API) before these pages can be built and tested — picked up in a later pass
+- [x] Leave pages (apply, approve) — unblocked: seeded a Leave Period + one Leave Type ("Annual
+  Leave", id=1) into `infra/seed/orangehrm.sql` so every fresh instance has the Leave module usable
+  once a per-employee entitlement is granted. `ApplyLeavePage`, `LeaveListPage` built and confirmed
+  against the running app; `LeaveClient` covers entitlements, self-apply, admin assign-on-behalf, and
+  approve/reject (self-apply lands "Pending Approval", admin assign auto-schedules instead — genuinely
+  different, confirmed via DB inspection)
 - [x] Failure artifacts wired into Allure: a `pytest_runtest_makereport` hook attaches a screenshot
   from `page`/`admin_page` on failure — verified with a deliberately failing throwaway test that the
   attachment lands in the Allure result
 
 ## Phase 4 — Hybrid + roles
 
-- [x] 3–5 E2E hybrid flows (API sets up state, UI verifies) — 3 done (`tests/e2e/`): employee created
+- [x] 3–5 E2E hybrid flows (API sets up state, UI verifies) — 4 done (`tests/e2e/`): employee created
   via API shows in PIM search; admin creates a user via UI for an API-created employee; user created
-  via API shows in Admin's user search. Leave-applied-in-UI-shows-via-API still needs Leave pages first
+  via API shows in Admin's user search; leave applied in the UI shows via the API
+  (`test_leave_apply_hybrid.py`, reuses the same authenticated session for the verification call)
 - [x] `auth/roles.py`: `Role` enum, per-role login + `storage_state` (`ess_storage_state` fixture
   creates a throwaway employee+ESS user via the API each session, logs in once, tears down after)
 - [x] `logged_in_as` parametrized fixture (indirect on `role`)
 - [x] Role tests: menu visibility (Admin vs. ESS — confirmed exact menu sets against the app), direct-URL
   access ("Credential Required" for ESS on an admin page), API 401/403 checks (403 confirmed)
-- [ ] Supervisor role tests: ESS user assigned as another employee's supervisor; can see and approve
-  their direct report's leave requests — **blocked**, same reason as Leave pages (needs Leave module
-  configured first)
+- [x] Supervisor role tests: ESS user assigned as another employee's supervisor; can see and approve
+  their direct report's leave requests (`tests/roles/test_supervisor_leave_approval.py`) — confirmed
+  the admin "Leave List" view only surfaces a pending request once a supervisor relationship exists
+  (`EmployeeClient.assign_supervisor`, the Report-to → Assigned Supervisors relationship), and that
+  self-approval is disabled (an employee viewing their own request only gets Add Comment/Cancel, never
+  Approve/Reject) — required the request to come from a separate report employee, not admin itself
 - [x] Network mocking tests (`page.route`) — employee-list API mocked to 500; confirmed the UI degrades
   gracefully (error toast + "No Records Found") rather than crashing
 - [x] Visual regression check — `expect(page).to_have_screenshot()` **does not exist in Python
@@ -164,10 +171,8 @@ All resolved:
 ## Coverage target sanity check
 
 - [ ] ~40–60 total tests across: OrangeHRM API, Restful Booker API, UI, E2E/hybrid (3–5), roles,
-  network mocking — not hundreds of shallow ones. **Still 31 at the end of Phase 6** (Phases 5/6 added
-  infrastructure, not tests) — under the 40–60 target. Not padded with low-value tests just to hit a
-  number (that would violate the same principle this item is checking); the honest next move is either
-  unblocking Leave pages/Supervisor role tests (TODO Phase 4) for several more real tests, or
-  deliberately deciding 31 well-chosen tests is enough for this portfolio's purposes — flagged to the
-  user rather than decided here
+  network mocking — not hundreds of shallow ones. **33 as of the Leave-pages unblock** (up from 31):
+  the Leave-applied-via-API hybrid test and the Supervisor approval role test, both previously blocked
+  and now built and passing. Still under the 40–60 target; not padded with low-value tests just to hit
+  a number. Closing the rest of the gap is a separate decision, not yet requested
 

@@ -1,7 +1,7 @@
 # CLAUDE.md — SynapseQA
 
 This file is the hand-off context for Claude Code. Read it fully before making changes.
-Last updated: 2026-10-19.
+Last updated: 2026-10-20.
 
 ---
 
@@ -38,17 +38,17 @@ at `docs/Test_Automation_Framework_Plan.docx`.
 
 ## 2. Current state of the codebase
 
-**Phases 1–6 are all complete**, except two Phase 4 items blocked by the same gap (Leave pages and
-Supervisor role tests, see below) — see `TODO.md`. Git repository initialized and pushed to
+**Phases 1–6 are all complete**, and the Leave-pages blocker (Leave pages + Supervisor role tests,
+Phase 4) is now resolved — see `TODO.md`. Git repository initialized and pushed to
 `https://github.com/loudoubleu/synapseqa` (public); CI runs on every pull request; nightly (browser
 matrix) and demo-smoke (public demo) run on schedule + manual dispatch; pre-commit hooks installed
 locally. Live Allure report: **https://loudoubleu.github.io/synapseqa/** (updated after every nightly
 run, history across runs).
 
-**One honest gap:** the suite is **31 tests**, under the 40–60 target from §1. Phases 5–6 added
-infrastructure and polish, not new tests, and nothing was padded in just to hit the number (see
-`TODO.md`'s coverage sanity check) — closing this gap for real means either unblocking Leave pages/
-Supervisor role tests, or deciding 31 well-chosen tests is enough for this portfolio. Not decided here.
+**One honest gap:** the suite is **33 tests** (up from 31), still under the 40–60 target from §1.
+Phases 5–6 added infrastructure and polish, not new tests, and the two tests added unblocking Leave
+pages are real scenarios, not padding (see `TODO.md`'s coverage sanity check) — closing the rest of
+the gap, or deciding 33 well-chosen tests is enough for this portfolio, is not decided here.
 
 ```
 SynapseQA/
@@ -79,28 +79,29 @@ SynapseQA/
 │   │   ├── pages/{base_page,login_page,dashboard_page}.py
 │   │   ├── pages/pim/{employee_list_page,add_employee_page,personal_details_page}.py
 │   │   ├── pages/admin/{user_management_page,add_user_page}.py
+│   │   ├── pages/leave/{apply_leave_page,leave_list_page}.py
 │   │   └── components/{component,dropdown,autocomplete,date_picker,data_table,toast,modal,side_menu}.py
 │   └── api/
 │       ├── base_client.py             # wraps APIRequestContext: get/post/put/patch/delete_json + logging
-│       ├── models/{common,employee,user,booking}.py
-│       └── clients/{employee_client,user_client,booking_client}.py
+│       ├── models/{common,employee,user,booking,leave}.py
+│       └── clients/{employee_client,user_client,booking_client,leave_client}.py
 └── tests/
     ├── conftest.py                    # settings/base_url/readiness + admin+ESS auth-state + role fixtures
-    │                                   # + all API client fixtures + an Allure failure-screenshot hook
+    │                                   # + all API client fixtures (incl. leave_client) + Allure screenshot hook
     ├── ui/{test_login,test_add_employee,test_personal_details,test_employee_delete_modal,
     │       test_network_mocking,test_visual_regression,test_accessibility}.py
-    ├── e2e/{test_employee_search_hybrid,test_admin_add_user_hybrid,test_user_search_hybrid}.py
-    ├── roles/test_role_access.py
+    ├── e2e/{test_employee_search_hybrid,test_admin_add_user_hybrid,test_user_search_hybrid,
+    │        test_leave_apply_hybrid}.py
+    ├── roles/{test_role_access,test_supervisor_leave_approval}.py
     └── api/{orangehrm/{test_employees,test_users}.py, restful_booker/{test_booking_smoke,test_booking_crud}.py}
 ```
 
 Still missing from the target layout: `docs/architecture.md` (Phase 6).
 
-**Leave pages and Supervisor role tests are deliberately not built yet — same blocker.** A fresh seeded
-instance has no leave type or leave period configured — `/leave/applyLeave` shows "No Leave Types with
-Leave Balance" rather than a usable form. Building `ApplyLeavePage`/approval pages (and, downstream,
-Supervisor role tests, which need an ESS user's leave request to approve) needs that configured first
-(via Admin > Leave in the UI, or finding the right API payload) — not yet investigated.
+**Leave pages and Supervisor role tests are built.** `infra/seed/orangehrm.sql` now bakes in a Leave
+Period (Jan 1–Dec 31) and one Leave Type ("Annual Leave", id `1`, exposed as
+`ANNUAL_LEAVE_TYPE_ID` in `leave_client.py`) so every fresh instance has the Leave module usable as
+soon as a per-employee entitlement is granted — see §7 for the full data-model/API writeup.
 
 GitHub repo secrets `TEST_ADMIN_USERNAME`/`TEST_ADMIN_PASSWORD` are set (via `gh secret set`, values
 never printed). History was rewritten once early on (commits `929aaac`..`3a1f5f1`) to drop an unwanted
@@ -140,6 +141,14 @@ never printed). History was rewritten once early on (commits `929aaac`..`3a1f5f1
 9. **`pyproject.toml` configured** with pytest markers, Playwright defaults, Allure, ruff, mypy; **`.gitignore` added**.
 10. **Sample smoke test passed** (headless Chromium opened the login page and found the Login button, 3.45 s).
     The sample test was a throwaway and is not in the repo.
+11. **Leave-pages blocker resolved.** Seeded a Leave Period + one Leave Type into
+    `infra/seed/orangehrm.sql` (re-dumped from a configured container, with session-accumulated audit
+    noise purged first — see §7). Built `LeaveClient`, `ApplyLeavePage`, `LeaveListPage`,
+    `EmployeeClient.assign_supervisor`; fixed a real `.fill()` bug in `DatePicker` (concatenated onto
+    existing content instead of replacing it on at least one date field). Added the two tests TODO.md
+    had flagged as blocked: the leave-applied-in-UI-shows-via-API hybrid test, and the Supervisor
+    role approval test. Verified against both the long-running dev stack and a genuinely fresh,
+    isolated container built from the new seed (full 33-test suite green on the fresh one). 31 → 33 tests.
 
 > Note: the user's long-running containers may still have been created from the **old** Compose file
 > (no Conf.php mount, unpinned images). Running `up -d --wait` recreates them on the new config;
@@ -379,6 +388,32 @@ Never change the admin's password or roles in tests; create dedicated test users
   — OrangeHRM's own publicly documented demo credentials, not secrets; `demo-smoke.yml` sets them as
   plain `env:` values, not GitHub secrets.
 
+- **Leave module data model (confirmed via UI exploration + direct DB inspection, not guessed):**
+  Leave Period and Leave Type are org-wide, singular/one-to-many config (now seeded, see §2/§3);
+  Leave Entitlement is a per-employee-per-type balance (`POST .../leave/leave-entitlements`, body
+  `{empNumber, leaveTypeId, fromDate, toDate, entitlement}`); a Leave Request is the actual
+  application. **Two different creation paths give genuinely different outcomes** — this was the key
+  discovery: self-apply (`POST .../leave/leave-requests`, authenticated as the employee themself)
+  lands as status "Pending Approval"; admin "Assign Leave" on someone's behalf
+  (`POST .../leave/employees/leave-requests`) **auto-schedules it instead** (status "Scheduled"),
+  with nothing left to approve. Approve/reject is
+  `PUT .../leave/employees/leave-requests/{id}` with `{"action": "APPROVE"|"REJECT"}`.
+  **Self-approval is disabled**: a user viewing their own pending request only gets "Add
+  Comment"/"Cancel Leave", never "Approve"/"Reject" — confirmed by trying it as admin on admin's own
+  request. **Visibility is supervisor-gated**: the admin/supervisor "Leave List" view
+  (`/leave/viewLeaveList`) only surfaces another employee's pending request once a supervisor
+  relationship exists via Report-to → Assigned Supervisors
+  (`POST /pim/employees/{empNumber}/supervisors`, body `{empNumber: <supervisor's>, reportingMethodId}`)
+  — a request from an employee with no assigned supervisor doesn't show up to anyone. **Working-day
+  constraint**: applying for a non-working day (default work week Mon–Fri) is rejected with "No
+  Working Days Selected" — hit for real with a Saturday date.
+- **`DatePicker` gotcha:** `.fill()` on at least one OrangeHRM date input (confirmed on Leave > Apply's
+  "To Date") doesn't clear existing content first — it concatenates the new value onto the stale one
+  instead of replacing it (confirmed via screenshot: `"026-11-022026-11-02"`). Not a timing issue
+  (tried waits up to 1.5s) and not autopopulation from the From Date field (confirmed empty).
+  `DatePicker.set_date()` now does an explicit `click()` + `Control+A` + `Delete` +
+  `type(value, delay=30)` instead.
+
 **Restful Booker facts verified:** `POST /auth` with valid credentials (`admin`/`password123`, the
 service's own public demo credentials) returns **200** `{"token": "..."}`; with bad credentials it
 still returns **200**, body `{"reason": "Bad credentials"}` — never 401/403, so `BookingClient.
@@ -410,20 +445,20 @@ disappear on its own; tests always create and delete their own data rather than 
 
 ---
 
-## 9. Exact next steps (all 6 roadmap phases done, except the Leave blocker)
+## 9. Exact next steps (all 6 roadmap phases done, including the former Leave blocker)
 
 Phases 1–6 are all done — see `TODO.md` for the checked-off detail on each, and git history for how
 every fact was verified for real (not assumed) before being coded, including real bugs found and fixed
 along the way: an xdist `storage_state` race, a `--browser` flag silently running two browsers at once,
 a visual-regression baseline captured on the wrong OS, Allure-on-Pages' live page being CDN-cached just
 long enough to look like history wasn't accumulating when it actually was (caught by checking the
-deployed git content directly, not trusting one screenshot), and (Phase 6) a hard-coded test password
-and a test that depended on the shared Booker demo already having data.
+deployed git content directly, not trusting one screenshot), (Phase 6) a hard-coded test password and a
+test that depended on the shared Booker demo already having data, and (the Leave-pages unblock) a
+`.fill()` bug that silently garbled a date field instead of replacing its content.
 
-The two Phase 4 open items (Leave pages, Supervisor role tests) share one blocker: a fresh seeded
-instance has no leave type or leave period configured (§7) — not yet investigated. There's also one
-honest gap from the original plan: **31 tests, under the 40–60 target** (§2) — not padded to hit the
-number.
+Both former Phase 4 open items (Leave pages, Supervisor role tests) are now done — see §2/§3/§7. The
+one remaining honest gap from the original plan: **33 tests, still under the 40–60 target** (§2) — not
+padded to hit the number.
 
 GitHub Pages is enabled (`gh-pages` branch, confirmed with the user before enabling since it's a public
 setting); live report at **https://loudoubleu.github.io/synapseqa/**, updated by `nightly.yml`'s
@@ -431,11 +466,9 @@ setting); live report at **https://loudoubleu.github.io/synapseqa/**, updated by
 
 **What's actually left, if picked back up:**
 
-- Unblock Leave pages/Supervisor role tests (configure a leave type + period, then build
-  `ApplyLeavePage` and approval pages the same way PIM/Admin pages were built — confirm real
-  locators/text against the running app first, never assume).
-- Close the 40–60 test-count gap, most naturally by adding the tests the above unblocks, rather than
-  inventing shallow coverage elsewhere just to hit a number.
+- Close the rest of the 40–60 test-count gap, if the user wants to pursue it further — by adding more
+  genuinely meaningful scenarios, not inventing shallow coverage just to hit a number. Not yet
+  requested beyond the Leave-pages unblock.
 - Everything else in the original plan (§1 Word doc) that was explicitly deferred is deferred
   deliberately, not forgotten — see `TODO.md` for the full phase-by-phase record.
 
