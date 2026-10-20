@@ -1,5 +1,10 @@
 # SynapseQA
 
+[![CI](https://github.com/loudoubleu/synapseqa/actions/workflows/ci.yml/badge.svg)](https://github.com/loudoubleu/synapseqa/actions/workflows/ci.yml)
+[![nightly](https://github.com/loudoubleu/synapseqa/actions/workflows/nightly.yml/badge.svg)](https://github.com/loudoubleu/synapseqa/actions/workflows/nightly.yml)
+[![demo-smoke](https://github.com/loudoubleu/synapseqa/actions/workflows/demo-smoke.yml/badge.svg)](https://github.com/loudoubleu/synapseqa/actions/workflows/demo-smoke.yml)
+[![Allure Report](https://img.shields.io/badge/Allure-Report-orange)](https://loudoubleu.github.io/synapseqa/)
+
 A portfolio-grade test automation framework built with **Playwright + Pytest + Python**, designed the
 way a production SDET team would build it: maintainable, layered, CI-ready, and easy to explain in an
 interview. It tests both a web UI and its backing REST API from one shared framework.
@@ -42,6 +47,52 @@ Restful Booker uses a bearer token.
 Tests never touch locators or raw HTTP directly. They speak in business terms
 (`pim.search_employee(name)`, `employee_api.create(employee)`), through page/component objects and API
 clients wired together in `tests/conftest.py`.
+
+### Project layout
+
+```
+src/framework/
+├── config/settings.py        # pydantic-settings: TEST_-prefixed env vars, local/demo
+├── auth/roles.py              # Role enum + expected per-role menu
+├── data/builders.py           # Faker-backed EmployeeBuilder, UserBuilder, BookingBuilder
+├── ui/
+│   ├── pages/                 # BasePage + login/dashboard + pim/ and admin/ subpackages
+│   └── components/            # Dropdown, Autocomplete, DatePicker, DataTable, Toast, Modal, SideMenu
+└── api/
+    ├── base_client.py         # wraps Playwright's APIRequestContext (get/post/put/patch/delete_json)
+    ├── models/                # pydantic request/response schemas (contract checks)
+    └── clients/                # EmployeeClient, UserClient, BookingClient
+
+tests/
+├── conftest.py                 # settings, auth-state (admin + ESS), all API client fixtures
+├── ui/        # OrangeHRM UI: login, PIM, visual regression, a11y, network mocking
+├── api/        # orangehrm/ and restful_booker/ — pure API tests
+├── e2e/        # hybrid: API sets up state, UI verifies it
+└── roles/      # Admin vs. ESS access tests
+```
+
+### How to add a test
+
+1. **Pick the right layer.** Pure API → `tests/api/<app>/`. UI-only → `tests/ui/`. API sets up state and
+   UI verifies it (or vice versa) → `tests/e2e/`. Role/permission-specific → `tests/roles/`.
+2. **Reuse or add a page object / API client.** Page objects live in `src/framework/ui/pages/`; they
+   expose locators and navigation methods, never assertions. API clients live in
+   `src/framework/api/clients/`; they return validated pydantic models, not raw JSON. If the page/
+   endpoint you need isn't covered yet, confirm its real locators/payload against the running app
+   first (`docker compose -f infra/docker-compose.orangehrm.yml up -d --wait`, then poke around with
+   Playwright directly) — never guess field names or locator text.
+3. **Generate test data with a builder**, don't hard-code it. `EmployeeBuilder`/`UserBuilder`/
+   `BookingBuilder` in `src/framework/data/builders.py` produce Faker-backed data with an
+   `auto_<uuid>`-style identifying field.
+4. **Clean up what you create.** Either use an existing fixture that already tears down (`employee`,
+   `booking`), or add a new one following the same `yield` + delete-in-teardown pattern.
+5. **Mark it.** At minimum one of `smoke`/`regression`; also `api`/`ui`/`e2e`/`roles` as appropriate;
+   `destructive` if it mutates shared data (auto-skipped when `TEST_ENV=demo`).
+6. **Run it, then run the quality gates**, before committing:
+   ```powershell
+   uv run pytest tests/path/to/test_file.py -v
+   uv run ruff check . ; uv run ruff format . ; uv run mypy src tests
+   ```
 
 ## Quick start (60 seconds)
 
