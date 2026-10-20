@@ -45,10 +45,9 @@ matrix) and demo-smoke (public demo) run on schedule + manual dispatch; pre-comm
 locally. Live Allure report: **https://loudoubleu.github.io/synapseqa/** (updated after every nightly
 run, history across runs).
 
-**One honest gap:** the suite is **33 tests** (up from 31), still under the 40–60 target from §1.
-Phases 5–6 added infrastructure and polish, not new tests, and the two tests added unblocking Leave
-pages are real scenarios, not padding (see `TODO.md`'s coverage sanity check) — closing the rest of
-the gap, or deciding 33 well-chosen tests is enough for this portfolio, is not decided here.
+**Test count: 33, decided final.** Under the original 40–60 estimate from §1, but the user confirmed
+33 well-chosen, real-scenario tests (not padded to hit a number) is enough for this portfolio — see
+`TODO.md`'s coverage sanity check. The project is complete.
 
 ```
 SynapseQA/
@@ -457,20 +456,17 @@ test that depended on the shared Booker demo already having data, and (the Leave
 `.fill()` bug that silently garbled a date field instead of replacing its content.
 
 Both former Phase 4 open items (Leave pages, Supervisor role tests) are now done — see §2/§3/§7. The
-one remaining honest gap from the original plan: **33 tests, still under the 40–60 target** (§2) — not
-padded to hit the number.
+test-count question is closed too: the user confirmed **33 tests** is enough for this portfolio,
+rather than chasing the original 40–60 estimate with lower-value coverage (§10).
 
 GitHub Pages is enabled (`gh-pages` branch, confirmed with the user before enabling since it's a public
 setting); live report at **https://loudoubleu.github.io/synapseqa/**, updated by `nightly.yml`'s
 `publish-report` job after every run.
 
-**What's actually left, if picked back up:**
-
-- Close the rest of the 40–60 test-count gap, if the user wants to pursue it further — by adding more
-  genuinely meaningful scenarios, not inventing shallow coverage just to hit a number. Not yet
-  requested beyond the Leave-pages unblock.
-- Everything else in the original plan (§1 Word doc) that was explicitly deferred is deferred
-  deliberately, not forgotten — see `TODO.md` for the full phase-by-phase record.
+**Project is complete.** There is no open work queued. If picked back up in the future, everything in
+the original plan (§1 Word doc) that was explicitly deferred remains deferred deliberately, not
+forgotten — see `TODO.md` for the full phase-by-phase record. Any new work from here would be a new
+ask, not a continuation of an open item.
 
 ---
 
@@ -479,7 +475,8 @@ setting); live report at **https://loudoubleu.github.io/synapseqa/**, updated by
 None currently open. **Decided:** reporting is **Allure** (already wired in `addopts`; the CLI needs
 Java and isn't installed locally yet — results still write to `reports/allure-results` without it);
 Supervisor role tests are in scope for Phase 4, not a stretch goal (§9); `Details.jpg` was intentionally
-deleted.
+deleted; the suite is **final at 33 tests** — the user confirmed this is enough for the portfolio
+rather than chasing the original 40–60 estimate further.
 
 ## 11. Working agreements for Claude
 

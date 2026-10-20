@@ -170,9 +170,10 @@ All resolved:
 
 ## Coverage target sanity check
 
-- [ ] ~40–60 total tests across: OrangeHRM API, Restful Booker API, UI, E2E/hybrid (3–5), roles,
-  network mocking — not hundreds of shallow ones. **33 as of the Leave-pages unblock** (up from 31):
-  the Leave-applied-via-API hybrid test and the Supervisor approval role test, both previously blocked
-  and now built and passing. Still under the 40–60 target; not padded with low-value tests just to hit
-  a number. Closing the rest of the gap is a separate decision, not yet requested
+- [x] ~40–60 total tests across: OrangeHRM API, Restful Booker API, UI, E2E/hybrid (3–5), roles,
+  network mocking — not hundreds of shallow ones. **Decided final at 33** (up from 31 after the
+  Leave-pages unblock: the Leave-applied-via-API hybrid test and the Supervisor approval role test,
+  both previously blocked and now built and passing). Under the original 40–60 estimate, but the user
+  confirmed 33 well-chosen, real-scenario tests is enough for this portfolio — not padded with
+  low-value tests just to hit a number from the original plan. Closed, not just deferred.
 
