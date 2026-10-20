@@ -1,6 +1,5 @@
 import os
 import sys
-import uuid
 from collections.abc import Generator, Iterator
 from pathlib import Path
 
@@ -18,7 +17,7 @@ from framework.api.clients.user_client import ESS_ROLE_ID, UserClient
 from framework.api.models.employee import Employee
 from framework.auth.roles import Role
 from framework.config.settings import Settings
-from framework.data.builders import EmployeeBuilder
+from framework.data.builders import EmployeeBuilder, UserBuilder
 from framework.ui.pages.login_page import LoginPage
 
 # xdist gives each worker its own session scope, so session-scoped fixtures that write to
@@ -28,7 +27,6 @@ WORKER_ID = os.environ.get("PYTEST_XDIST_WORKER", "master")
 AUTH_DIR = Path(__file__).resolve().parent.parent / ".auth"
 ADMIN_STORAGE_STATE_PATH = AUTH_DIR / f"admin_state.{WORKER_ID}.json"
 ESS_STORAGE_STATE_PATH = AUTH_DIR / f"ess_state.{WORKER_ID}.json"
-ESS_TEST_PASSWORD = "Aut0!RoleTest2026"
 
 
 @pytest.fixture(scope="session")
@@ -91,17 +89,19 @@ def ess_storage_state(
     employee_api = EmployeeClient(api_context, base_url)
     user_api = UserClient(api_context, base_url)
 
-    emp = employee_api.create(first_name="RoleTest", last_name=f"auto_{uuid.uuid4().hex[:8]}")
+    emp_builder = EmployeeBuilder()
+    emp = employee_api.create(first_name=emp_builder.first_name, last_name=emp_builder.last_name)
+    user_builder = UserBuilder()
     user = user_api.create(
-        username=f"auto_{uuid.uuid4().hex[:8]}",
-        password=ESS_TEST_PASSWORD,
+        username=user_builder.username,
+        password=user_builder.password,
         user_role_id=ESS_ROLE_ID,
         emp_number=emp.emp_number,
     )
 
     login_context = browser.new_context(base_url=base_url)
     login_page = LoginPage(login_context.new_page()).open()
-    dashboard = login_page.login(user.user_name, ESS_TEST_PASSWORD)
+    dashboard = login_page.login(user.user_name, user_builder.password)
     expect(dashboard.heading).to_be_visible()
     login_context.storage_state(path=ESS_STORAGE_STATE_PATH)
     login_context.close()
@@ -179,6 +179,16 @@ def booking_client(playwright: Playwright, settings: Settings) -> Iterator[Booki
     request_context = playwright.request.new_context(base_url=booker_url)
     yield BookingClient(request_context, booker_url)
     request_context.dispose()
+
+
+@pytest.fixture
+def auth_token(booking_client: BookingClient) -> str:
+    # Restful Booker's own publicly documented demo credentials (not a project secret) --
+    # there's no self-hosted alternative to this third-party service, so there's nothing to
+    # read from config here.
+    token = booking_client.authenticate("admin", "password123")
+    assert token is not None
+    return token
 
 
 @pytest.hookimpl(hookwrapper=True)

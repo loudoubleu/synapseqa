@@ -7,16 +7,6 @@ from framework.api.clients.booking_client import BookingClient
 from framework.api.models.booking import CreatedBooking
 from framework.data.builders import BookingBuilder
 
-BOOKER_USERNAME = "admin"
-BOOKER_PASSWORD = "password123"
-
-
-@pytest.fixture
-def auth_token(booking_client: BookingClient) -> str:
-    token = booking_client.authenticate(BOOKER_USERNAME, BOOKER_PASSWORD)
-    assert token is not None
-    return token
-
 
 @pytest.fixture
 def booking(booking_client: BookingClient, auth_token: str) -> Iterator[CreatedBooking]:
