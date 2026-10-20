@@ -1,0 +1,6 @@
+INFO     framework.api.base_client:base_client.py:30 POST https://restful-booker.herokuapp.com/auth
+INFO     framework.api.base_client:base_client.py:32 -> 200 https://restful-booker.herokuapp.com/auth
+INFO     framework.api.base_client:base_client.py:30 POST https://restful-booker.herokuapp.com/booking
+INFO     framework.api.base_client:base_client.py:32 -> 200 https://restful-booker.herokuapp.com/booking
+INFO     framework.api.base_client:base_client.py:57 DELETE https://restful-booker.herokuapp.com/booking/901
+INFO     framework.api.base_client:base_client.py:59 -> 201 https://restful-booker.herokuapp.com/booking/901
