@@ -141,17 +141,33 @@ All resolved:
 
 ## Phase 6 — Showcase polish
 
-- [ ] README architecture diagram + "how to add a test" guide
-- [ ] Short demo GIF
-- [ ] Status badges (build, Allure report link)
-- [ ] Clean commit history (conventional commits); PRs against own repo so CI is visible
-- [ ] Final pass: no `time.sleep`, no XPath-heavy locators, no assertions in page objects,
-  no dependence on pre-existing data, no hard-coded credentials
+- [x] README architecture diagram + "how to add a test" guide — the conceptual diagram was already
+  accurate; added a concrete `src`/`tests` project layout (previously missing) and a step-by-step
+  "How to add a test" section
+- [x] Short demo GIF — no recording tool was available locally (no ffmpeg/vhs/asciinema), so built it
+  from real Playwright screenshots + Pillow: login → dashboard → PIM search finding an employee just
+  created via the API (the actual flagship hybrid pattern, not a mockup). `docs/media/demo.gif`, ~190KB
+- [x] Status badges (build, Allure report link) — CI/nightly/demo-smoke workflow badges + an Allure
+  Report badge; verified each badge URL actually resolves (200, image/svg+xml) before committing
+- [x] Clean commit history (conventional commits); PRs against own repo so CI is visible — reviewed the
+  full `git log`: consistent `feat`/`fix`/`docs`/`ci`/`chore`/`refactor` prefixes throughout, no noise
+  commits, nothing needing squashing. One real PR (#1) already exists demonstrating the pattern
+  (opened to verify `ci.yml`, merged); the rest of the work went directly to `main` as agreed with the
+  user throughout this project — not retroactively redone as PRs, since that would just be performative
+- [x] Final pass: no `time.sleep`, no XPath-heavy locators, no assertions in page objects, no
+  dependence on pre-existing data, no hard-coded credentials — audited with a full-tree grep; the
+  first four were already clean. Found and fixed two real issues: a hard-coded ESS test password
+  (now Faker-generated via `UserBuilder`, like every other test-data fixture) and a Booker smoke test
+  that assumed the shared public demo already had booking data (now creates and cleans up its own,
+  matching the project's own documented principle for that exact service)
 
 ## Coverage target sanity check
 
 - [ ] ~40–60 total tests across: OrangeHRM API, Restful Booker API, UI, E2E/hybrid (3–5), roles,
-  network mocking — not hundreds of shallow ones. **31 tests as of end of Phase 4** (5 OrangeHRM API,
-  10 Restful Booker API, 8 UI incl. visual/a11y/network-mocking, 3 E2E hybrid, 4 roles, 3 UI login) —
-  on track; Phase 5/6 shouldn't need many more to land in range
+  network mocking — not hundreds of shallow ones. **Still 31 at the end of Phase 6** (Phases 5/6 added
+  infrastructure, not tests) — under the 40–60 target. Not padded with low-value tests just to hit a
+  number (that would violate the same principle this item is checking); the honest next move is either
+  unblocking Leave pages/Supervisor role tests (TODO Phase 4) for several more real tests, or
+  deliberately deciding 31 well-chosen tests is enough for this portfolio's purposes — flagged to the
+  user rather than decided here
 

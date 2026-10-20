@@ -38,12 +38,17 @@ at `docs/Test_Automation_Framework_Plan.docx`.
 
 ## 2. Current state of the codebase
 
-**Phases 1–5 are complete**, except two Phase 4 items blocked by the same gap (Leave pages and
+**Phases 1–6 are all complete**, except two Phase 4 items blocked by the same gap (Leave pages and
 Supervisor role tests, see below) — see `TODO.md`. Git repository initialized and pushed to
 `https://github.com/loudoubleu/synapseqa` (public); CI runs on every pull request; nightly (browser
 matrix) and demo-smoke (public demo) run on schedule + manual dispatch; pre-commit hooks installed
 locally. Live Allure report: **https://loudoubleu.github.io/synapseqa/** (updated after every nightly
 run, history across runs).
+
+**One honest gap:** the suite is **31 tests**, under the 40–60 target from §1. Phases 5–6 added
+infrastructure and polish, not new tests, and nothing was padded in just to hit the number (see
+`TODO.md`'s coverage sanity check) — closing this gap for real means either unblocking Leave pages/
+Supervisor role tests, or deciding 31 well-chosen tests is enough for this portfolio. Not decided here.
 
 ```
 SynapseQA/
@@ -405,31 +410,34 @@ disappear on its own; tests always create and delete their own data rather than 
 
 ---
 
-## 9. Exact next steps (Phases 1–5 complete, except the Leave blocker → now in Phase 6)
+## 9. Exact next steps (all 6 roadmap phases done, except the Leave blocker)
 
-Phases 1–5 are done — see `TODO.md` for the checked-off detail on each, and git history for how every
-fact was verified for real (not assumed) before being coded, including real bugs found and fixed along
-the way: an xdist `storage_state` race, a `--browser` flag silently running two browsers at once, a
-visual-regression baseline captured on the wrong OS, and (Allure-on-Pages) the live page being
-CDN-cached just long enough to look like history wasn't accumulating when it actually was — caught by
-checking the deployed git content directly instead of trusting one screenshot. The two Phase 4 open
-items (Leave pages, Supervisor role tests) share one blocker: a fresh seeded instance has no leave type
-or leave period configured (§7) — not yet investigated.
+Phases 1–6 are all done — see `TODO.md` for the checked-off detail on each, and git history for how
+every fact was verified for real (not assumed) before being coded, including real bugs found and fixed
+along the way: an xdist `storage_state` race, a `--browser` flag silently running two browsers at once,
+a visual-regression baseline captured on the wrong OS, Allure-on-Pages' live page being CDN-cached just
+long enough to look like history wasn't accumulating when it actually was (caught by checking the
+deployed git content directly, not trusting one screenshot), and (Phase 6) a hard-coded test password
+and a test that depended on the shared Booker demo already having data.
+
+The two Phase 4 open items (Leave pages, Supervisor role tests) share one blocker: a fresh seeded
+instance has no leave type or leave period configured (§7) — not yet investigated. There's also one
+honest gap from the original plan: **31 tests, under the 40–60 target** (§2) — not padded to hit the
+number.
 
 GitHub Pages is enabled (`gh-pages` branch, confirmed with the user before enabling since it's a public
 setting); live report at **https://loudoubleu.github.io/synapseqa/**, updated by `nightly.yml`'s
 `publish-report` job after every run.
 
-**Now in Phase 6 — showcase polish** (per the roadmap and `TODO.md`):
+**What's actually left, if picked back up:**
 
-- README architecture diagram refresh (reflect the actual current layout, not just the Phase 1 sketch),
-  a "how to add a test" guide, a short demo GIF.
-- Status badges (CI build, Allure report link).
-- Clean commit history check — conventional commits throughout already; confirm nothing needs squashing.
-- A final pass for `time.sleep`, XPath-heavy locators, assertions inside page objects, dependence on
-  pre-existing data, hard-coded credentials — the project's own stated anti-patterns (§6).
-- Decide on and, if picked up, unblock Leave pages/Supervisor role tests (still deferred, not in scope
-  unless explicitly revisited).
+- Unblock Leave pages/Supervisor role tests (configure a leave type + period, then build
+  `ApplyLeavePage` and approval pages the same way PIM/Admin pages were built — confirm real
+  locators/text against the running app first, never assume).
+- Close the 40–60 test-count gap, most naturally by adding the tests the above unblocks, rather than
+  inventing shallow coverage elsewhere just to hit a number.
+- Everything else in the original plan (§1 Word doc) that was explicitly deferred is deferred
+  deliberately, not forgotten — see `TODO.md` for the full phase-by-phase record.
 
 ---
 
