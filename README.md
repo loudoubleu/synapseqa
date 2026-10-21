@@ -5,9 +5,11 @@
 [![demo-smoke](https://github.com/loudoubleu/synapseqa/actions/workflows/demo-smoke.yml/badge.svg)](https://github.com/loudoubleu/synapseqa/actions/workflows/demo-smoke.yml)
 [![Allure Report](https://img.shields.io/badge/Allure-Report-orange)](https://loudoubleu.github.io/synapseqa/)
 
-A portfolio-grade test automation framework built with **Playwright + Pytest + Python**, designed the
-way a production SDET team would build it: maintainable, layered, CI-ready, and easy to explain in an
-interview. It tests both a web UI and its backing REST API from one shared framework.
+SynapseQA | A Unified Hybrid Test Automation Framework
+
+An end-to-end test automation framework built with Python, Pytest, and Playwright, designed to bridge
+web UI automation and REST API testing into a single, maintainable, layered, CI-ready, and scalable
+suite.
 
 ![Demo: an employee created via the API shows up in a UI search — the flagship hybrid test pattern, captured live against the running app](docs/media/demo.gif)
 
