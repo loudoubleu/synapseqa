@@ -27,7 +27,8 @@ cookie; Restful Booker uses a token.
 2. **Hybrid tests.** Use the API to set up state and the UI to verify it (flagship pattern).
 3. **Built for real teams.** Parallel runs, multiple environments, traceable failures, containerized CI.
 4. **The code is the showcase.** Type hints, linting, clean layers, documented decisions (ADRs).
-5. **Role-based tests.** Prove Admin vs. ESS (regular employee) access at both UI and API level.
+5. **Role-based tests.** Prove Admin vs. ESS (Employee Self-Service — OrangeHRM's term for its
+   regular-employee role) access at both UI and API level.
 6. Aim for **40–60 high-quality tests**, not hundreds of shallow ones.
 
 The full design plan (13 sections: goals, apps, environment strategy, stack, architecture, layout,
@@ -315,8 +316,9 @@ Never change the admin's password or roles in tests; create dedicated test users
   fields empty renders two "Required" validation messages (one per field). Successful login lands on
   a page with a `role=heading` element named "Dashboard".
 - **Admin's side menu** (confirmed): `['Admin', 'PIM', 'Leave', 'Time', 'Recruitment', 'My Info',
-  'Performance', 'Dashboard', 'Directory', 'Maintenance', 'Claim', 'Buzz']`. ESS's menu is still
-  unverified — needed for Phase 4's role tests.
+  'Performance', 'Dashboard', 'Directory', 'Maintenance', 'Claim', 'Buzz']` — `PIM` is OrangeHRM's own
+  name for its employee-records module (Personal Information Management: the employee list, add/edit,
+  photo upload). ESS's menu is still unverified — needed for Phase 4's role tests.
 - **UI widgets (custom, not native HTML controls):** dropdown trigger is a `.oxd-select-text` div;
   clicking it opens a `role=listbox` of `role=option` items (fully role-locatable once open). The
   typeahead ("Type for hints...") autocomplete works the same way — fill the input, then
