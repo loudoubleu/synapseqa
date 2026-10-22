@@ -1,2 +1,0 @@
-[2m2026-10-21T08:19:07.213683Z[0m [[32m[1minfo     [0m] [1mPOST https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-10-21T08:19:07.353842Z[0m [[32m[1minfo     [0m] [1m-> 500 https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
