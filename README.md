@@ -21,7 +21,7 @@ suite.
 | **Restful Booker** | API-only app: token auth, CRUD, chained requests | Hosted public API |
 
 The two apps show **two authentication styles** side by side: OrangeHRM uses a browser session cookie,
-Restful Booker uses a bearer token.
+Restful Booker uses a token (fetched from `POST /auth` and sent back as a `Cookie: token=…` header).
 
 ## Objectives
 
@@ -171,6 +171,9 @@ find real API payloads and locators by watching the running app rather than gues
 along the way, and a worked case study (unblocking the Leave module) showing that process end to end.
 
 ## Architecture Decision Records
+
+For the full picture — layer rules, fixture graph, auth model, test-data lifecycle and CI topology — see
+[`docs/architecture.md`](docs/architecture.md).
 
 Key design decisions and their rationale live in [`docs/adr/`](docs/adr/), e.g. why tests run against a
 local Docker instance rather than only the public demo, why API tests use Playwright's own

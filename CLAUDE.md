@@ -64,7 +64,8 @@ SynapseQA/
 │   └── demo-smoke.yml                  # weekly + manual: smoke subset, serial, vs. the public demo
 ├── docs/
 │   ├── Test_Automation_Framework_Plan.docx
-│   └── adr/0001-…  0002-…  0003-…     # no architecture.md yet
+│   ├── architecture.md                 # layers, fixture graph, auth, data lifecycle, CI topology
+│   └── adr/0001-…  0002-…  0003-…
 ├── __snapshots__/                     # visual-regression baselines — committed; generated on Linux
 │                                       # (the Dockerized runner), NOT locally on Windows — see §7
 ├── infra/
@@ -96,7 +97,7 @@ SynapseQA/
     └── api/{orangehrm/{test_employees,test_users}.py, restful_booker/{test_booking_smoke,test_booking_crud}.py}
 ```
 
-Still missing from the target layout: `docs/architecture.md` (Phase 6).
+`docs/architecture.md` was the last missing piece of the target layout; it was added 2026-10-26.
 
 **Leave pages and Supervisor role tests are built.** `infra/seed/orangehrm.sql` now bakes in a Leave
 Period (Jan 1–Dec 31) and one Leave Type ("Annual Leave", id `1`, exposed as
@@ -149,6 +150,9 @@ never printed). History was rewritten once early on (commits `929aaac`..`3a1f5f1
     had flagged as blocked: the leave-applied-in-UI-shows-via-API hybrid test, and the Supervisor
     role approval test. Verified against both the long-running dev stack and a genuinely fresh,
     isolated container built from the new seed (full 33-test suite green on the fresh one). 31 → 33 tests.
+12. **`docs/architecture.md` added** (2026-10-26): layers + dependency rules, fixture graph, auth model,
+    hybrid-test sequence, data lifecycle, environments/infra, CI topology, failure artifacts, extension
+    points, and where the build deliberately deviates from the original plan.
 
 > Note: the user's long-running containers may still have been created from the **old** Compose file
 > (no Conf.php mount, unpinned images). Running `up -d --wait` recreates them on the new config;

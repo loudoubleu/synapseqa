@@ -151,6 +151,8 @@ All resolved:
 - [x] README architecture diagram + "how to add a test" guide — the conceptual diagram was already
   accurate; added a concrete `src`/`tests` project layout (previously missing) and a step-by-step
   "How to add a test" section
+- [x] `docs/architecture.md` — layers + dependency rules, fixture graph, auth model, hybrid-test flow,
+  data lifecycle, environments, CI topology, failure artifacts, extension points, deviations from plan
 - [x] Short demo GIF — no recording tool was available locally (no ffmpeg/vhs/asciinema), so built it
   from real Playwright screenshots + Pillow: login → dashboard → PIM search finding an employee just
   created via the API (the actual flagship hybrid pattern, not a mockup). `docs/media/demo.gif`, ~190KB
