@@ -1,0 +1,8 @@
+[2m2026-10-27T08:41:11.077292Z[0m [[32m[1minfo     [0m] [1mPOST https://restful-booker.herokuapp.com/auth[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.380547Z[0m [[32m[1minfo     [0m] [1m-> 200 https://restful-booker.herokuapp.com/auth[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.382304Z[0m [[32m[1minfo     [0m] [1mPOST https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.460029Z[0m [[32m[1minfo     [0m] [1m-> 200 https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.465241Z[0m [[32m[1minfo     [0m] [1mPUT https://restful-booker.herokuapp.com/booking/151[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.542500Z[0m [[32m[1minfo     [0m] [1m-> 403 https://restful-booker.herokuapp.com/booking/151[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.543747Z[0m [[32m[1minfo     [0m] [1mDELETE https://restful-booker.herokuapp.com/booking/151[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-10-27T08:41:11.620294Z[0m [[32m[1minfo     [0m] [1m-> 201 https://restful-booker.herokuapp.com/booking/151[0m [[0m[1m[34mframework.api.base_client[0m][0m
