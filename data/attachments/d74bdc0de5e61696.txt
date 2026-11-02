@@ -1,0 +1,2 @@
+INFO     framework.api.base_client:base_client.py:21 GET https://restful-booker.herokuapp.com/booking
+INFO     framework.api.base_client:base_client.py:23 -> 200 https://restful-booker.herokuapp.com/booking
