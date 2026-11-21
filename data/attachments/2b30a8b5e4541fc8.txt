@@ -1,0 +1,12 @@
+[2m2026-11-21T10:41:16.929288Z[0m [[32m[1minfo     [0m] [1mPOST https://restful-booker.herokuapp.com/auth[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.951695Z[0m [[32m[1minfo     [0m] [1m-> 200 https://restful-booker.herokuapp.com/auth[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.953269Z[0m [[32m[1minfo     [0m] [1mPOST https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.958780Z[0m [[32m[1minfo     [0m] [1m-> 200 https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.959440Z[0m [[32m[1minfo     [0m] [1mGET https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.964760Z[0m [[32m[1minfo     [0m] [1m-> 200 https://restful-booker.herokuapp.com/booking[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.965625Z[0m [[32m[1minfo     [0m] [1mDELETE https://restful-booker.herokuapp.com/booking/183[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.970845Z[0m [[32m[1minfo     [0m] [1m-> 201 https://restful-booker.herokuapp.com/booking/183[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:17.030987Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:17.058623Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:17.059305Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:17.095018Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m

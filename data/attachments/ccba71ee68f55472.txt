@@ -1,0 +1,4 @@
+[2m2026-11-21T10:41:33.163662Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:33.245118Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:33.246343Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:33.337905Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m

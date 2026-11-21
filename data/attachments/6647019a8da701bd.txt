@@ -1,0 +1,16 @@
+[2m2026-11-21T10:41:12.869209Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:12.929147Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:12.931371Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.294571Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.296721Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.334449Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.335718Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.619686Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.631816Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/pim/employees/302/supervisors[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.706264Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees/302/supervisors[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.706440Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/leave/leave-entitlements[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:13.839967Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/leave/leave-entitlements[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.673062Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/leave/leave-requests[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:16.755546Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/leave/leave-requests[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:22.427092Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:22.519022Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m

@@ -1,0 +1,7 @@
+OrangeHRM is ready at http://localhost:8081/ (attempt 1)
+[2m2026-11-21T10:41:01.497138Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:01.732021Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:01.740879Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:01.865759Z[0m [[32m[1minfo     [0m] [1m-> 422 http://localhost:8081/web/index.php/api/v2/admin/users[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:01.871264Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
+[2m2026-11-21T10:41:01.945791Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
