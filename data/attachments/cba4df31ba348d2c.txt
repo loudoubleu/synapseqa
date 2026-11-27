@@ -1,8 +1,0 @@
-[2m2026-11-26T11:56:12.141020Z[0m [[32m[1minfo     [0m] [1mPOST http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.236364Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.239935Z[0m [[32m[1minfo     [0m] [1mGET http://localhost:8081/web/index.php/api/v2/pim/employees/293[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.314060Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees/293[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.316678Z[0m [[32m[1minfo     [0m] [1mPUT http://localhost:8081/web/index.php/api/v2/pim/employees/293/personal-details[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.475482Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees/293/personal-details[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.482951Z[0m [[32m[1minfo     [0m] [1mDELETE http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
-[2m2026-11-26T11:56:12.573994Z[0m [[32m[1minfo     [0m] [1m-> 200 http://localhost:8081/web/index.php/api/v2/pim/employees[0m [[0m[1m[34mframework.api.base_client[0m][0m
